@@ -8,7 +8,7 @@
   };
 
   const FOOTER = {
-    zh: '如需進一步協助，請聯繫您的區域業務。',
+    zh: '如需進一步協助，請聯繫您的區域業務 📞',
     en: 'For further assistance, please contact your regional sales representative.',
   };
 
@@ -16,8 +16,8 @@
     overview: {
       zh: [
         'KMBA菁英計畫 2026 是 KT&G 大韓菸草針對全台 HORECA 夜間通路推出的年度會員經營計畫 ✨',
-        '活動期間：2026 年 8 月～2027 年 1 月。',
-        '核心目標：提升寶亨新品曝光、建立新品教育、強化業務互動、建立主理人交流圈。',
+        '📅 活動期間：2026 年 8 月～2027 年 1 月',
+        '🎯 核心目標：提升寶亨新品曝光、建立新品教育、強化業務互動、建立主理人交流圈',
       ],
       en: [
         "KMBA Elite Program 2026 is KT&G's annual member engagement program for Taiwan's HORECA night-trade channel.",
@@ -28,10 +28,10 @@
     daily: {
       zh: [
         '📋 日常任務（每月上限 1000 分）',
-        '• 客人推薦紀錄（250 分）',
-        '• 新品陳列照（250 分）',
-        '• 新品 QA 挑戰（250 分）',
-        '• 業務 QA 挑戰（250 分）',
+        '• 客人推薦紀錄（250 分）📝',
+        '• 新品陳列照（250 分）📸',
+        '• 新品 QA 挑戰（250 分）❓',
+        '• 業務 QA 挑戰（250 分）🎯',
         '',
         '🎫 積分兌換抽獎券：500 分→1 張｜750 分→2 張｜1000 分→3 張（每月上限）',
       ],
@@ -47,12 +47,12 @@
     },
     tickets: {
       zh: [
-        '🎫 取得抽獎券的方式：',
+        '🎫 取得抽獎券的方式',
         '',
-        '【日常任務】',
+        '📋【日常任務】',
         '積分 500 分→1 張｜750 分→2 張｜1000 分→3 張（每月上限）',
         '',
-        '【拜訪任務】',
+        '🤝【拜訪任務】',
         '每拜訪 1 間 KMBA 簽約店→1 張（每月上限 5 張）',
       ],
       en: [
@@ -67,18 +67,18 @@
         '🎁 超商禮券說明',
         '',
         '⚠️ 「超商禮券」≠「抽獎券」',
-        '• 抽獎券：參加雙月抽獎用的資格券（由日常／拜訪任務累積）',
-        '• 超商禮券：實際發放的現金禮券獎勵',
+        '• 🎫 抽獎券：參加雙月抽獎用的資格券（由日常／拜訪任務累積）',
+        '• 💰 超商禮券：實際發放的現金禮券獎勵',
         '',
-        '【每月排行禮券】依當月積分排名發放：',
-        '• TOP 1–10：高額超商禮券',
-        '• TOP 11–30：中額超商禮券',
-        '• TOP 31–100：參與獎超商禮券',
-        '※ 各級距面額以當月活動公告為準；完成日常任務累積積分、進入排名後，由總部安排發放。',
+        '📊【每月排行禮券】依當月積分排名發放：',
+        '• 🥇 TOP 1–10：新台幣 1,000 元超商禮券',
+        '• 🥈 TOP 11–30：新台幣 500 元超商禮券',
+        '• 🥉 TOP 31–100：新台幣 200 元超商禮券',
+        '※ 完成日常任務累積積分、進入排名後，由總部安排發放 ✉️',
         '',
-        '【雙月抽獎禮券】',
+        '🎉【雙月抽獎禮券】',
         '• 8–9 月累積抽獎券→10 月抽｜10–12 月累積→2027/1 抽',
-        '• 每次 15 位店家，每位 5,000 元超商禮券',
+        '• 每次 15 位店家，每位 5,000 元超商禮券 🎊',
       ],
       en: [
         'Convenience store gift vouchers:',
@@ -88,23 +88,23 @@
         '• Gift vouchers: actual cash vouchers awarded as prizes',
         '',
         'Monthly ranking vouchers (by points ranking):',
-        '• TOP 1–10: premium voucher',
-        '• TOP 11–30: mid-tier voucher',
-        '• TOP 31–100: participation voucher',
-        'Exact amounts follow the monthly announcement.',
+        '• TOP 1–10: NT$1,000 convenience store voucher',
+        '• TOP 11–30: NT$500 convenience store voucher',
+        '• TOP 31–100: NT$200 convenience store voucher',
+        'Issued by headquarters after ranking based on monthly points.',
         '',
         'Bi-monthly draw: 15 winners, NT$5,000 voucher each',
       ],
     },
     visit: {
       zh: [
-        '🤝 拜訪任務流程：',
-        '1. 拜訪其他 KMBA 簽約店',
-        '2. 與寶亨／KT&G 陳列架合照（本人需入鏡）',
-        '3. 透過 SurveyCake 上傳',
-        '4. 每月固定審核，通過後發放抽獎券',
+        '🤝 拜訪任務流程',
+        '1. 拜訪其他 KMBA 簽約店 🏪',
+        '2. 與寶亨／KT&G 陳列架合照（本人需入鏡）📸',
+        '3. 透過 SurveyCake 上傳 📤',
+        '4. 每月固定審核，通過後發放抽獎券 ✅',
         '',
-        '每拜訪 1 間店＝1 張抽獎券，每月上限 5 張。',
+        '🎫 每拜訪 1 間店＝1 張抽獎券，每月上限 5 張',
       ],
       en: [
         'Visit mission steps:',
@@ -119,8 +119,8 @@
     regional: {
       zh: [
         '🏆 北中南區域競賽',
-        '各區依「任務完成率」競賽，不比積分、不比進貨量。',
-        '冠軍區域：所有符合資格店家額外獲得 1 張抽獎券。',
+        '📈 各區依「任務完成率」競賽，不比積分、不比進貨量',
+        '🎫 冠軍區域：所有符合資格店家額外獲得 1 張抽獎券',
       ],
       en: [
         'Regional challenge (North / Central / South):',
@@ -131,13 +131,13 @@
     reward: {
       zh: [
         '🎁 獎勵制度',
-        '• 每月排行：TOP 1–10 高額｜11–30 中額｜31–100 參與獎（超商禮券）',
-        '• 雙月抽：8–9 月累積→10 月抽｜10–12 月累積→2027/1 抽，抽完歸零',
-        '• 每次 15 位店家，每位 5,000 元超商禮券',
+        '📊 每月排行：TOP 1–10 新台幣 1,000 元｜11–30 新台幣 500 元｜31–100 新台幣 200 元（超商禮券）',
+        '🗓️ 雙月抽：8–9 月累積→10 月抽｜10–12 月累積→2027/1 抽，抽完歸零',
+        '🎉 每次 15 位店家，每位 5,000 元超商禮券',
       ],
       en: [
         'Reward system:',
-        '• Monthly ranking: TOP 1–10 premium | 11–30 mid-tier | 31–100 participation vouchers',
+        '• Monthly ranking: TOP 1–10 NT$1,000 | 11–30 NT$500 | 31–100 NT$200 (gift vouchers)',
         '• Bi-monthly raffle: Aug–Sep→Oct | Oct–Dec→Jan 2027; tickets reset after each draw',
         '• 15 winners per draw, NT$5,000 gift voucher each',
       ],
@@ -145,9 +145,9 @@
     line: {
       zh: [
         '💬 LINE 官方帳號提供：',
-        '• 每月任務公告、任務回傳',
-        '• SurveyCake 與 Visit 回傳入口',
-        '• AI 智慧客服、活動公告、抽獎資訊',
+        '• 📢 每月任務公告、任務回傳',
+        '• 📋 SurveyCake 與 Visit 回傳入口',
+        '• 🤖 AI 智慧客服、活動公告、抽獎資訊',
       ],
       en: [
         'LINE Official Account provides:',
@@ -159,8 +159,8 @@
     persona: {
       zh: [
         '您好，我是 KMBA菁英計畫官方智慧客服 👋',
-        '我可以協助您了解日常任務、拜訪任務、抽獎券、區域競賽與雙月抽獎。',
-        '請直接輸入問題，或點選下方快捷問題。',
+        '我可以協助您了解日常任務、拜訪任務、抽獎券、區域競賽與雙月抽獎 😊',
+        '請直接輸入問題，或點選下方快捷問題 👇',
       ],
       en: [
         "Hello! I'm the official AI assistant for the KMBA Elite Program.",
@@ -176,7 +176,7 @@
       en: 'For pricing information, please contact your regional sales representative.',
     },
     legal: {
-      zh: '法規相關問題請洽 KMBA 總部或區域業務，客服無法提供法規判定。',
+      zh: '⚖️ 法規相關問題請洽 KMBA 總部或區域業務，客服無法提供法規判定。',
       en: 'For legal or regulatory questions, please contact KMBA headquarters or your regional sales representative.',
     },
   };
