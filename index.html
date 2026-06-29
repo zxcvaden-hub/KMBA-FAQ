@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!-- ============================================================ -->
+<!-- 【根目錄 index.html】= KMBA AI 智慧客服首頁（非抽獎頁）        -->
+<!-- 抽獎頁在 lucky/index.html                                    -->
+<!-- ============================================================ -->
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -298,6 +302,20 @@
     function sendMessage(text) {
       const q = (text || '').trim();
       if (!q) return;
+
+      // Hidden access phrases → jump to the lucky draw pages.
+      const code = q.toLowerCase();
+      if (code === 'luckydrawlist' || code === 'luckydrawsetting') {
+        addMsg(q, 'user');
+        input.value = '';
+        addMsg('🍀 幸運星通道開啟中…', 'system');
+        const dest = code === 'luckydrawsetting' ? 'lucky/index.html' : 'lucky/index.html?view=1';
+        setTimeout(function () {
+          window.location.href = dest;
+        }, 700);
+        return;
+      }
+
       addMsg(q, 'user');
       input.value = '';
       setLoading(true);

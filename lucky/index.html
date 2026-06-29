@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KMBA菁英計畫 2026 — 公開抽獎工具</title>
+  <style>
+    :root {
+      --blue: #0066CC;
+      --blue-dark: #004C99;
+      --bg: #121A30;
+      --card: #FFFFFF;
+      --soft: #F4F6FA;
+      --mint: #EAFDF8;
+      --gold: #E8B53A;
+      --text: #1A1A1A;
+      --muted: #5A6475;
+      --line: #E6EBF2;
+      --ok: #1E9E6A;
+      --warn: #C2410C;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    #confetti {
+      position: fixed; inset: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: 9999;
+    }
+    body {
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      background:
+        radial-gradient(1200px 520px at 50% -60px, rgba(232,181,58,.20), transparent 62%),
+        linear-gradient(160deg, #0B1022 0%, #0E1630 55%, #090E20 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      padding: 28px 16px 60px;
+      color: var(--text);
+    }
+    .wrap {
+      width: min(860px, 100%); margin: 0 auto;
+      border-radius: 22px; overflow: hidden;
+      box-shadow: 0 30px 70px rgba(0,0,0,.5), 0 0 0 1px rgba(232,181,58,.28);
+    }
+    .topbar-outer {
+      width: min(860px, 100%); margin: 0 auto 12px;
+      display: flex; justify-content: flex-end;
+    }
+    .topbar-outer a { color: #cfe0ff; font-size: 12.5px; text-decoration: none; }
+    .topbar-outer a:hover { color: #F4E2A8; text-decoration: underline; }
+    /* Hero banner */
+    .hero { position: relative; line-height: 0; }
+    .hero img { width: 100%; height: auto; display: block; }
+    .hero::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38%;
+      background: linear-gradient(180deg, transparent, rgba(9,14,32,.92));
+      pointer-events: none;
+    }
+    .hero-caption {
+      background: linear-gradient(180deg, #0C1326 0%, #111a33 100%);
+      padding: 16px 26px 18px; text-align: center;
+      border-bottom: 1px solid rgba(232,181,58,.22);
+    }
+    .hero-caption .tag {
+      font-size: 15px; font-weight: 800; letter-spacing: 4px;
+      background: linear-gradient(180deg, #FBE7A6, #E8B53A 60%, #B9831E);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero-caption .sub { font-size: 12px; color: #9fb0c9; margin-top: 7px; letter-spacing: .5px; }
+    .hero-badges { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .hero-badges span {
+      border: 1px solid rgba(232,181,58,.45); color: #F4E2A8;
+      padding: 4px 13px; border-radius: 999px; font-size: 11px;
+      background: rgba(232,181,58,.08);
+    }
+    .panel {
+      background: var(--card);
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel:last-of-type { border-radius: 0 0 20px 20px; border-bottom: none; }
+    .step-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 700; color: var(--blue-dark);
+      margin-bottom: 6px;
+    }
+    .step-no {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(150deg, #F6D77A, #E8B53A 55%, #C8962A);
+      color: #3a2a00; font-size: 14px; font-weight: 800;
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(200,150,42,.4);
+    }
+    .step-hint { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%; border: 1px solid #D7E3F4; border-radius: 12px;
+      padding: 12px 14px; font-size: 14px; font-family: inherit; outline: none;
+      color: var(--text);
+    }
+    textarea { min-height: 150px; resize: vertical; line-height: 1.6; white-space: pre; }
+    textarea:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,102,204,.12); }
+    select {
+      width: 100%; border: 1px solid #D7E3F4; border-radius: 12px;
+      padding: 11px 12px; font-size: 14px; font-family: inherit; outline: none;
+      background: #fff; color: var(--text); cursor: pointer;
+    }
+    select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,102,204,.12); }
+    .upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .file-btn {
+      display: inline-block; padding: 11px 18px; border-radius: 12px;
+      background: var(--mint); color: var(--blue-dark); border: 1px solid #BEE9DE;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .file-btn:hover { background: #DCF7EF; }
+    .preview {
+      margin-top: 6px; max-height: 240px; overflow-y: auto;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    }
+    .prow {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      padding: 7px 12px; font-size: 13px; border-bottom: 1px solid #F0F3F8;
+    }
+    .prow:last-child { border-bottom: none; }
+    .prow .pname { color: var(--text); word-break: break-all; }
+    .prow .ptix { color: var(--blue-dark); font-weight: 700; flex-shrink: 0; }
+    .check {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12.5px; color: var(--muted); line-height: 1.6; cursor: pointer;
+    }
+    .check input { margin-top: 2px; flex-shrink: 0; }
+    .check code { background: var(--soft); padding: 1px 5px; border-radius: 5px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .row > div { flex: 1; min-width: 180px; }
+    label { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+    .stat {
+      margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+      background: var(--soft); font-size: 13px; line-height: 1.7;
+    }
+    .stat b { color: var(--blue-dark); }
+    .hash {
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      font-size: 12px; word-break: break-all; color: var(--text);
+      background: #fff; border: 1px dashed #C9D6EA; border-radius: 8px;
+      padding: 8px 10px; margin-top: 6px;
+    }
+    .btn {
+      border: none; border-radius: 12px; padding: 13px 22px;
+      font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: .15s;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #C8962A); color: #3a2a00; width: 100%; font-size: 17px; padding: 16px; }
+    .btn-gold:hover { filter: brightness(1.04); }
+    .btn-ghost { background: #fff; color: var(--blue-dark); border: 1px solid #D7E3F4; padding: 9px 14px; font-size: 13px; }
+    .btn-ghost:hover { background: var(--mint); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .alert {
+      margin-top: 12px; padding: 10px 14px; border-radius: 10px;
+      font-size: 13px; line-height: 1.6; display: none;
+    }
+    .alert.show { display: block; }
+    .alert.err { background: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5; }
+    .alert.info { background: var(--mint); color: var(--blue-dark); border: 1px solid #BEE9DE; }
+    .results { display: none; }
+    .results.show { display: block; }
+    .winner {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px;
+      margin-bottom: 8px; background: #fff;
+      animation: pop .35s ease both;
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .rank {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: grid; place-items: center; font-weight: 800; font-size: 15px;
+      background: linear-gradient(150deg, #F6D77A, #E8B53A 55%, #C8962A);
+      color: #3a2a00;
+      box-shadow: 0 2px 6px rgba(200,150,42,.35);
+    }
+    .winner {
+      border-color: rgba(232,181,58,.45);
+    }
+    .prize-banner {
+      margin: 0 0 14px; padding: 12px 16px; border-radius: 12px; text-align: center;
+      font-size: 14px; color: #7A5A12; font-weight: 600;
+      background: linear-gradient(135deg, rgba(232,181,58,.18), rgba(232,181,58,.05));
+      border: 1px solid rgba(232,181,58,.55);
+    }
+    .prize-banner b { color: #B9831E; font-size: 15px; }
+    .winfo { min-width: 0; }
+    .nameline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .winner .name { font-weight: 700; font-size: 15px; word-break: break-all; }
+    .rtag {
+      flex-shrink: 0; font-size: 11px; font-weight: 700; color: var(--blue-dark);
+      background: #EAF1FB; border: 1px solid #CFE0F6;
+      padding: 2px 9px; border-radius: 999px;
+    }
+    .winner .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .verify-box {
+      margin-top: 16px; padding: 14px 16px; border-radius: 12px;
+      background: var(--soft); font-size: 12.5px; line-height: 1.8;
+    }
+    .verify-box .k { color: var(--muted); }
+    .verify-box .v { font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif; word-break: break-all; }
+    .note { font-size: 12px; color: var(--muted); line-height: 1.8; }
+    details { margin-top: 14px; }
+    summary { cursor: pointer; font-weight: 700; color: var(--blue-dark); font-size: 14px; }
+    details p, details li { font-size: 12.5px; color: var(--muted); line-height: 1.8; }
+    details ul { margin: 8px 0 0 18px; }
+    .topbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+    .topbar a { color: #cfe0ff; font-size: 12.5px; text-decoration: none; }
+    .topbar a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="topbar-outer"><a href="../index.html">← 返回 KMBA 智慧客服</a></div>
+
+  <div class="wrap">
+    <div class="hero">
+      <img src="banner.png" alt="KMBA菁英計畫 幸運星抽獎" />
+    </div>
+    <div class="hero-caption">
+      <div class="tag">公 平 · 公 正 · 公 開 · 可 驗 證</div>
+      <div class="sub">KT&amp;G 大韓菸草 · KMBA菁英計畫 2026 線上抽獎</div>
+      <div class="hero-badges">
+        <span>🎲 可驗證隨機</span>
+        <span>⚖️ 加權不放回</span>
+        <span>🔒 離線運作</span>
+      </div>
+    </div>
+
+    <!-- Step 1: 名單 -->
+    <section class="panel" id="stepImport">
+      <div class="step-title"><span class="step-no">1</span>匯入參加名單</div>
+      <div class="step-hint">
+        上傳活動匯出的 <b>CSV 名單</b>（含標題列），系統會自動辨識「姓名／店別／抽獎券總數」欄位。<br />
+        支援 UTF-8 與 Big5（Excel 另存）編碼。也可改用最下方手動貼上。
+      </div>
+
+      <div class="upload">
+        <label class="file-btn" for="csvFile">📄 選擇 CSV 檔案</label>
+        <input type="file" id="csvFile" accept=".csv,text/csv" hidden />
+        <span class="note" id="fileName">尚未選擇檔案</span>
+      </div>
+
+      <div id="mapBox" style="display:none">
+        <div class="row" style="margin-top:14px">
+          <div>
+            <label>姓名欄位</label>
+            <select id="colName"></select>
+          </div>
+          <div>
+            <label>店別欄位（顯示用，可不選）</label>
+            <select id="colStore"></select>
+          </div>
+          <div>
+            <label>區域欄位（顯示用，可不選）</label>
+            <select id="colRegion"></select>
+          </div>
+          <div>
+            <label>抽獎券數欄位</label>
+            <select id="colTickets"></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div style="flex:0 0 100%">
+            <label>重複參加者處理（影響「同一人最多中一次」）</label>
+            <select id="dupMode">
+              <option value="name">同「姓名」合併、券數加總（建議）</option>
+              <option value="namestore">同「姓名＋店別」合併、券數加總</option>
+              <option value="row">每筆資料各自計算（不合併）</option>
+            </select>
+          </div>
+        </div>
+        <label class="check" style="margin-top:10px">
+          <input type="checkbox" id="fuzzyMerge" checked />
+          合併時忽略英文大小寫與空白差異（例如 <code>Terminal one Tpe</code> 與 <code>TERMINAL ONE TPE</code> 視為相同）
+        </label>
+      </div>
+
+      <details style="margin-top:14px">
+        <summary>改用手動貼上名單</summary>
+        <div class="step-hint" style="margin-top:10px">每行一位：<b>姓名,抽獎券數</b>。支援逗號、Tab 或空白分隔。</div>
+        <textarea id="participants" placeholder="大韓夜店,12&#10;寶亨小酒館,8&#10;王小明,5"></textarea>
+      </details>
+
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="btnParse">解析名單並產生快照</button>
+        <button type="button" class="btn btn-ghost" id="btnSample">載入文字範例</button>
+      </div>
+      <div class="alert err" id="parseErr"></div>
+      <div class="stat" id="parseStat" style="display:none">
+        <div>有效參加者：<b id="cntPeople">0</b> 位｜抽獎券總數：<b id="cntTickets">0</b> 張</div>
+        <div style="margin-top:8px" class="k">名單快照（SHA-256，開獎前請先公告此碼）：</div>
+        <div class="hash" id="listHash">—</div>
+        <div class="k" style="margin-top:10px">名單預覽（依券數高至低）：</div>
+        <div class="preview" id="preview"></div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="btnDownloadList">下載解析後名單（CSV，開獎前存證）</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: 種子 -->
+    <section class="panel" id="stepSeed">
+      <div class="step-title"><span class="step-no">2</span>輸入公開隨機種子</div>
+      <div class="step-hint">
+        建議使用「事先公告的<b>台灣彩券指定期開獎號碼</b>」作為種子（公開、不可預測、無法操控）。<br />
+        例如指定「2026/10/15 威力彩」號碼，開獎後將號碼填入即可。
+      </div>
+      <div class="row">
+        <div>
+          <label>公開種子（彩券期別 + 號碼）</label>
+          <input type="text" id="seed" placeholder="例：2026-10-15 威力彩 05-12-18-23-30-37-08" />
+        </div>
+        <div style="flex:0 0 auto">
+          <label>得獎人數</label>
+          <input type="number" id="numWinners" value="15" min="1" style="width:120px" />
+        </div>
+      </div>
+      <div class="note" style="margin-top:10px">規則：每張抽獎券皆為一個入獎權重，券越多機率越高；同一位參加者最多中獎一次（不放回）。</div>
+    </section>
+
+    <!-- Step 3: 開獎 -->
+    <section class="panel" id="stepDraw">
+      <div class="step-title" id="drawTitle"><span class="step-no">3</span>執行公開開獎</div>
+      <div class="step-hint" id="drawHint">開獎為確定性運算：相同名單 + 相同種子，任何人重跑都會得到完全相同的結果。</div>
+      <button type="button" class="btn btn-gold" id="btnDraw" disabled>🎲 一鍵開獎</button>
+      <button type="button" class="btn btn-gold" id="btnPlay" style="display:none">▶ 觀看開獎</button>
+      <div class="alert info" id="drawInfo"></div>
+
+      <div class="results" id="results">
+        <h3 style="margin:20px 0 10px;color:var(--blue-dark)">🥇 中獎名單（共 <span id="winCount">15</span> 位・獎項相同）</h3>
+        <div class="prize-banner">🎁 獎項：每位中獎者可獲<b>價值新台幣 $5,000 元超商禮券</b></div>
+        <div id="winnerList"></div>
+
+        <div class="verify-box">
+          <div><span class="k">名單快照：</span><span class="v" id="vHash"></span></div>
+          <div><span class="k">使用種子：</span><span class="v" id="vSeed"></span></div>
+          <div><span class="k">開獎時間：</span><span class="v" id="vTime"></span></div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="btnDownload">下載結果（CSV）</button>
+          <button type="button" class="btn btn-ghost" id="btnCopy">複製公告文字</button>
+          <button type="button" class="btn btn-ghost" id="btnExportView">下載觀眾頁結果檔（result.json）</button>
+        </div>
+        <div class="note" id="exportHint" style="display:none">
+          將下載的 <code>result.json</code> 放進本資料夾並上傳，觀眾頁（輸入通關語進入）任何裝置都會自動讀取此結果。
+        </div>
+      </div>
+
+      <details>
+        <summary>如何驗證這次開獎是公正的？</summary>
+        <ul>
+          <li>開獎<b>前</b>，主辦方已公告「名單快照碼」與「將採用哪一期彩券號碼當種子」。</li>
+          <li>名單快照是整份名單的 SHA-256 指紋，名單若被更動，快照碼一定會變，無法事後造假。</li>
+          <li>種子採用未來才開、公開且無人能操控的彩券號碼，主辦方無法挑選對自己有利的種子。</li>
+          <li>抽選演算法完全公開且具確定性：任何人把<b>相同名單 + 相同種子</b>貼進本工具，都會抽出<b>完全相同</b>的得獎名單。</li>
+        </ul>
+      </details>
+    </section>
+  </div>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script src="lucky.js"></script>
+</body>
+</html>
