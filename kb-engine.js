@@ -486,7 +486,7 @@
   }
 
   function formatReply(lines, lang) {
-    return lines.join('\n').trim() + '\n\n' + FOOTER[lang];
+    return lines.join('\n').trim() + '\n' + FOOTER[lang];
   }
 
   function guardrailBlock(query, lang) {
