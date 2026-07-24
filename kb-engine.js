@@ -18,8 +18,8 @@
 
   const RELATED_QUESTIONS = {
     giftCard: [
+      '每月積分排行商品卡差別',
       '每月排名怎麼計算？',
-      '每月有哪些任務？',
       '積分相同怎麼排名？',
     ],
     raffleTicket: [
@@ -288,6 +288,16 @@
     return null;
   }
 
+  function giftCardTierLines() {
+    return [
+      '每月依大家完成任務的積分排名，並參考提交時間進行排序。',
+      '第 1～20 名：500 元商品卡',
+      '第 21～40 名：200 元商品卡',
+      '第 41～100 名：100 元商品卡',
+      '需當月完成至少 1 項任務才有排行資格。',
+    ];
+  }
+
   function checklistBlock(type) {
     const c = PHOTO_CHECKLIST[type];
     if (!c) return [];
@@ -335,8 +345,8 @@
       get(depth, query) {
         const detailed = depth === 'detailed';
         const details = [
-          '【商品卡】依每月積分排行，可獲得 100～500 元統一超商商品卡（非禮券）',
-          '需當月完成至少 1 項任務',
+          '【商品卡】依每月積分排行發放（非禮券）',
+          ...giftCardTierLines(),
           '',
           '【抽獎券】完成任務累積，參加雙月抽獎',
           ...bimonthlyDetailsForQuery(query, detailed),
@@ -361,8 +371,10 @@
         const brief = formatAnswer({
           conclusion: '商品卡依每月積分排行發放，需當月完成至少 1 項任務。',
           details: [
-            '完成常態任務可累積積分，100～500 元統一超商商品卡依排名發放。',
+            '完成常態任務可累積積分，商品卡依每月積分排行發放。',
             '我們發放的是「商品卡」，不是禮券。',
+            '',
+            ...giftCardTierLines(),
           ],
           nextStep: step('giftCard'),
           suggestions: RELATED_QUESTIONS.giftCard,
@@ -657,6 +669,28 @@
       },
     },
     {
+      id: 'gift_card_tiers',
+      topic: 'giftCard',
+      keywords: [
+        '100～500', '100-500', '500元', '200元', '100元', '差別', '区别', '面額',
+        '前20', '前20名', '21~40', '21～40', '41~100', '41～100', '發放金額', '名次',
+        '500元200元', '商品卡價值', '排行獎勵',
+      ],
+      match(n) {
+        return (/100.*500|500.*100|500元|200元|100元/.test(n) && /差|别|別|面額|商品卡|禮券|礼券/.test(n))
+          || /前20|21.*40|41.*100|發放金額|名次.*商品|商品卡.*名次/.test(n)
+          || /每月積分排行.*差|排行.*100.*500/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '商品卡面額依每月積分排行名次發放，名次越高，面額越高。',
+          details: giftCardTierLines(),
+          nextStep: step('giftCard'),
+          suggestions: RELATED_QUESTIONS.giftCard,
+        });
+      },
+    },
+    {
       id: 'ranking_tie',
       topic: 'giftCard',
       keywords: ['積分相同怎麼排名'],
@@ -678,7 +712,7 @@
       get() {
         return formatAnswer({
           conclusion: '商品卡依當月積分排行發放，同分時以提交時間較早者優先。',
-          details: ['需當月完成至少 1 項任務才有排行資格。'],
+          details: giftCardTierLines(),
           nextStep: step('giftCard'),
           suggestions: RELATED_QUESTIONS.giftCard,
         });
@@ -966,7 +1000,7 @@
   const CLARIFY_OPTION_MAP = {
     giftCard: {
       '怎麼獲得': '商品卡怎麼拿',
-      '每月發放金額': '獎勵有哪些',
+      '每月發放金額': '每月積分排行商品卡差別',
       '排名怎麼計算': '每月排名怎麼計算？',
       '完整規則': '獎勵有哪些',
     },
