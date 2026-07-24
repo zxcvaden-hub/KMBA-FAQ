@@ -23,7 +23,9 @@ FOOTER = {
 }
 
 QUICK_TOPICS = {
+    "常態": "daily",
     "任務": "daily",
+    "商品卡": "reward",
     "日常": "daily",
     "積分": "daily",
     "抽獎券": "daily",
@@ -32,8 +34,11 @@ QUICK_TOPICS = {
     "拜訪": "visit",
     "visit": "visit",
     "跨店": "visit",
-    "區域": "regional",
+    "區域競賽": "regional",
     "北中南": "regional",
+    "北區": "regional",
+    "中區": "regional",
+    "南區": "regional",
     "獎勵": "reward",
     "排行": "reward",
     "雙月": "reward",
@@ -48,109 +53,106 @@ QUICK_TOPICS = {
     "overview": "overview",
     "mission": "daily",
     "point": "daily",
+    "不定時": "daily",
+    "不定时": "daily",
+    "提交時間": "daily",
+    "回覆時間": "daily",
+    "加分": "daily",
+    "即時": "daily",
+    "即时": "daily",
 }
 
 ANSWERS: dict[str, dict[str, list[str]]] = {
     "overview": {
         "zh": [
             "KMBA菁英計畫 2026 是 KT&G 大韓菸草針對全台 HORECA 夜間通路推出的年度會員經營計畫 ✨",
-            "核心目標：提升寶亨新品曝光、建立新品教育、強化業務互動、建立主理人交流圈。",
+            "活動期間：2026 年 8 月～12 月",
+            "從「單次實體活動」轉向「全年數位賦能」",
         ],
         "en": [
             "KMBA Elite Program 2026 is KT&G's annual member engagement program for Taiwan's HORECA night-trade channel.",
-            "Goals include product exposure, education, sales engagement, and building the owner community.",
+            "Program period: August – December 2026.",
         ],
     },
     "daily": {
         "zh": [
-            "📋 日常任務（每月上限 1000 分）",
-            "• 客人推薦紀錄（250 分）",
-            "• 新品陳列照（250 分）",
-            "• 新品 QA 挑戰（250 分）",
-            "• 業務 QA 挑戰（250 分）",
+            "📋 常態任務（每月上限 300 分）",
             "",
-            "🎫 抽獎券：500 分→1 張｜750 分→2 張｜1000 分→3 張（每月上限）",
+            "⏱️ 日常任務以「提交／回覆時間」為加分項目，越早完成越有優勢",
+            "📢 因此任務會不定時透過 LINE 官方帳號發布，請即時關注通知",
+            "",
+            "• 品牌隨堂考問券（Google）100 分 → 3 張抽獎券",
+            "• 客人推薦照片（SurveyCake）100 分 → 1 張",
+            "• 新品陳列照片（SurveyCake）100 分 → 2 張",
+            "",
+            "🎫 積分兌換：100 分→1 張｜200 分→2 張｜300 分以上→3 張",
+            "※ 問券每店只取最高分；同分以提交時間較早者優先",
         ],
         "en": [
-            "Daily missions (max 1,000 points/month):",
-            "• Customer recommendation (250 pts)",
-            "• New product display photo (250 pts)",
-            "• New product QA challenge (250 pts)",
-            "• Sales rep QA challenge (250 pts)",
-            "",
-            "Raffle tickets: 500 pts→1 | 750 pts→2 | 1,000 pts→3 (monthly max)",
+            "Regular missions (max 300 pts/month):",
+            "Submission time is a bonus factor; missions released irregularly via LINE.",
+            "Brand quiz 100 pts→3 tickets; recommendation photo 100→1; display photo 100→2.",
+            "Points: 100→1 | 200→2 | 300+→3 tickets.",
         ],
     },
     "visit": {
         "zh": [
-            "🤝 拜訪任務流程：",
-            "1. 拜訪其他 KMBA 簽約店",
-            "2. 與寶亨／KT&G 陳列架合照（本人需入鏡）",
-            "3. 透過 SurveyCake 上傳",
-            "4. 每月固定審核，通過後發放抽獎券",
-            "",
-            "每拜訪 1 間店＝1 張抽獎券，每月上限 5 張。",
+            "🤝 拜訪任務（社群交流）",
+            "1. 拜訪 KMBA 簽約店 2. 與大韓菸草陳列架合照",
+            "3. LINE 官方帳號上傳 4. 每月 20 日審核",
+            "每拜訪 1 間店＝1 張抽獎券，每月上限 5 張，雙月上限 10 張。",
         ],
         "en": [
-            "Visit mission steps:",
-            "1. Visit another KMBA partner store",
-            "2. Photo with Bohem/KT&G display (owner must appear)",
-            "3. Upload via SurveyCake",
-            "4. Monthly review; raffle ticket issued upon approval",
-            "",
-            "1 store visit = 1 ticket, max 5 tickets/month.",
+            "Visit mission: partner store → photo with display → LINE upload → reviewed on 20th.",
+            "1 ticket per visit; max 5/month, 10 bimonthly.",
         ],
     },
     "regional": {
         "zh": [
-            "🏆 北中南區域競賽",
-            "各區依「任務完成率」競賽，不比積分、不比進貨量。",
-            "冠軍區域：所有符合資格店家額外獲得 1 張抽獎券。",
+            "📢 北中南區域競賽已取消，目前沒有區域排名競賽",
+            "",
+            "現僅保留「拜訪任務」：",
+            "拜訪簽約店 → 陳列架合照 → LINE 上傳 → 每月 20 日審核",
+            "每拜訪 1 間店＝1 張抽獎券（每月上限 5 張，雙月上限 10 張）",
         ],
         "en": [
-            "Regional challenge (North / Central / South):",
-            "Regions compete by task completion rate—not points or purchase volume.",
-            "Winning region: all eligible stores receive 1 extra raffle ticket.",
+            "The North/Central/South regional competition has been discontinued.",
+            "Only visit missions remain: 1 ticket per visit, max 5/month, 10 bimonthly.",
         ],
     },
     "reward": {
         "zh": [
-            "🎁 獎勵制度",
-            "• 每月排行：TOP 1–10 高額｜11–30 中額｜31–100 參與獎（超商禮券）",
-            "• 雙月抽：8–9 月累積→10 月抽｜10–12 月累積→2027/1 抽，抽完歸零",
-            "• 每次 15 位店家，每位 5,000 元超商禮券",
+            "🎁 獎勵制度（V0723）",
+            "• 每月排行商品卡：TOP 1–20 五百元｜21–40 兩百元｜41–100 一百元",
+            "• 加碼抽獎券：3 張／2 張／1 張",
+            "• 雙月抽：10 月 15×1,000 元｜12 月 15×2,000 元，抽完歸零",
+            "• 當月至少完成 1 項任務才有領獎資格",
         ],
         "en": [
-            "Reward system:",
-            "• Monthly ranking: TOP 1–10 premium | 11–30 mid-tier | 31–100 participation vouchers",
-            "• Bi-monthly raffle: Aug–Sep→Oct | Oct–Dec→Jan 2027; tickets reset after each draw",
-            "• 15 winners per draw, NT$5,000 gift voucher each",
+            "Monthly gift cards: TOP 1–20 NT$500 | 21–40 NT$200 | 41–100 NT$100",
+            "Bi-monthly draw: Oct 15×NT$1,000 | Dec 15×NT$2,000; reset after each draw.",
         ],
     },
     "line": {
         "zh": [
-            "💬 LINE 官方帳號提供：",
-            "• 每月任務公告、任務回傳",
-            "• SurveyCake 與 Visit 回傳入口",
-            "• AI 智慧客服、活動公告、抽獎資訊",
+            "💬 LINE 官方帳號：",
+            "• 常態任務公告（不定時發布，請即時關注）",
+            "• 提交／回覆時間為加分項目，任務一發布請盡快完成",
+            "• SurveyCake 回傳、拜訪照片上傳",
+            "圖文選單左：新品資訊｜右：線上智慧客服",
         ],
         "en": [
-            "LINE Official Account provides:",
-            "• Monthly mission announcements and submissions",
-            "• SurveyCake and Visit mission uploads",
-            "• AI assistant, event updates, and raffle information",
+            "LINE: irregular mission alerts, submission links, visit uploads, AI FAQ chatbot.",
         ],
     },
     "persona": {
         "zh": [
             "您好，我是 KMBA菁英計畫官方智慧客服 👋",
-            "我可以協助您了解日常任務、拜訪任務、抽獎券、區域競賽與雙月抽獎。",
-            "請直接輸入問題，或點選下方快捷問題。",
+            "我可以協助您了解常態任務、拜訪任務、抽獎券、商品卡與雙月抽獎。",
         ],
         "en": [
             "Hello! I'm the official AI assistant for the KMBA Elite Program.",
-            "I can help with daily missions, visit missions, raffle tickets, regional challenges, and bi-monthly raffles.",
-            "Type your question or tap a quick prompt below.",
+            "I can help with regular missions, visit missions, tickets, gift cards, and raffles.",
         ],
     },
 }
@@ -171,7 +173,6 @@ SUGGESTIONS = [
     "怎麼取得抽獎券？",
     "拜訪任務要怎麼完成？",
     "雙月抽獎什麼時候？",
-    "區域競賽怎麼算？",
     "LINE 官方帳號可以做什麼？",
 ]
 
@@ -229,6 +230,15 @@ def parse_kb(path: Path) -> tuple[str, list[Section]]:
             body = title
         sections.append(Section(title=title, body=body, keywords=tokenize(title + " " + body)))
     return raw, sections
+
+
+def is_regional_competition_query(query: str) -> bool:
+    q = query.lower()
+    patterns = (
+        "區域競賽", "区域竞赛", "區域賽", "北中南", "北區", "中區", "南區", "冠軍區",
+        "regional competition", "north central south",
+    )
+    return any(p in q for p in patterns)
 
 
 class KnowledgeBase:
@@ -313,6 +323,9 @@ class KnowledgeBase:
         q_lower = query.lower()
         if query in greetings_zh or q_lower in greetings_en:
             return {"reply": self.reply_for_topic("persona", lang), "lang": lang, "sources": ["AI Persona"]}
+
+        if is_regional_competition_query(query):
+            return {"reply": self.reply_for_topic("regional", lang), "lang": lang, "sources": ["regional"]}
 
         topic = self.detect_topic(query)
         if topic:

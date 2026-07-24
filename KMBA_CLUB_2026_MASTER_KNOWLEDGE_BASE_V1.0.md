@@ -1,177 +1,168 @@
-# KMBA菁英計畫 2026 MASTER KNOWLEDGE BASE V1.0
+# KMBA菁英計畫 2026 MASTER KNOWLEDGE BASE V0723
 
+> 客戶確認版（2026/07/23 簡報）  
 > Single Source of Truth for KMBA Elite Program 2026  
-> **回覆語言：繁體中文（主）＋ English（對照）**
+> **回覆語言：繁體中文（主）／English（英文提問）**
 
 ---
 
 ## Project Overview｜專案概述
 
 **繁體中文：**  
-KMBA菁英計畫 2026 為 KT&G 大韓菸草針對全台夜間通路（HORECA）推出之年度會員經營計畫。
+KMBA菁英計畫 2026 為 KT&G 大韓菸草針對全台 HORECA 夜間通路推出之年度會員經營計畫。從「單次實體活動」全面轉向「全年數位賦能」，攜手 HORECA 頂尖通路打造高價值同盟生態圈。
 
 **English:**  
-KMBA Elite Program 2026 is KT&G's annual member engagement program for Taiwan's HORECA night-trade channel.
+KMBA Elite Program 2026 is KT&G's annual member engagement program for Taiwan's HORECA night-trade channel—shifting from one-off events to year-round digital engagement.
 
-**核心目標 Goals:**
-- 提升寶亨新品曝光 / Increase Bohem product exposure
-- 建立新品教育 / Build product education
-- 提升店家參與率 / Increase store participation
-- 強化業務互動 / Strengthen sales rep engagement
-- 建立主理人交流圈 / Build owner community network
-- 提升品牌認同與續約意願 / Strengthen brand loyalty and renewal
+**活動期間：** 2026 年 8 月～12 月
 
 ---
 
 # System Architecture｜系統架構
 
-1. Daily Mission（日常任務）
-2. Visit Mission（拜訪任務）
-3. Reward System（獎勵制度）
+1. 常態任務（Regular Missions）
+2. 拜訪任務（Visit Mission／社群交流）
+3. 獎勵制度（商品卡排行 ＋ 雙月抽獎）
 
 ---
 
-# Daily Mission｜日常任務
+# Regular Missions｜常態任務
 
-## 任務分類 Task Categories
+**每月積分上限：300 分**
 
-### 照片型 Photo Tasks
-- 客人推薦紀錄（250 分）/ Customer recommendation record (250 pts)
-- 新品陳列照（250 分）/ New product display photo (250 pts)
+## 發布方式與加分機制
 
-### 問卷型 Survey Tasks
-- 新品 QA 挑戰（250 分）/ New product QA challenge (250 pts)
+- **提交／回覆時間為加分項目**，越早完成越有優勢
+- 因此任務**不定時**透過 **LINE 官方帳號**發布
+- 請店家**即時關注**官方 LINE，避免錯過任務
 
-### 神秘任務 Mystery Tasks
-- 業務 QA 挑戰（250 分）/ Sales rep QA challenge (250 pts)
+| 任務 | 積分 | 自動獲得抽獎券 |
+|------|------|----------------|
+| 品牌隨堂考問券（Google 問券） | 100 分 | 3 張 |
+| 客人推薦照片（SurveyCake） | 100 分 | 1 張 |
+| 新品陳列照片（SurveyCake） | 100 分 | 2 張 |
 
-**每月總積分 Monthly cap: 1000 points**
+## 積分兌換抽獎券
 
-## 日常任務抽獎券 Daily Mission → Raffle Tickets
+| 積分 | 抽獎券 |
+|------|--------|
+| 100 分 | 1 張 |
+| 200 分 | 2 張 |
+| 300 分以上 | 3 張 |
 
-| 積分 Points | 抽獎券 Tickets |
-|-------------|----------------|
-| 500 分 | 1 張 |
-| 750 分 | 2 張 |
-| 1000 分 | 3 張（每月上限 / monthly max） |
-
----
-
-# Visit Mission｜拜訪任務
-
-**繁體中文目的：** 建立 KMBA菁英計畫主理人交流圈，提升品牌認同與跨店交流。  
-**English Purpose:** Build the KMBA Elite owner network and cross-store engagement.
-
-**流程 Process:**
-1. 拜訪 KMBA 簽約店 / Visit a KMBA partner store
-2. 與寶亨/KT&G 陳列架合照（本人需入鏡）/ Photo with Bohem/KT&G display (owner must appear)
-3. SurveyCake 上傳 / Upload via SurveyCake
-4. 每月固定審核 / Monthly review
-5. 通過後發放抽獎券 / Raffle ticket issued upon approval
-
-**獎勵 Rewards:**
-- 每拜訪 1 間店＝1 張抽獎券 / 1 store visit = 1 ticket
-- 每月上限 5 張 / Max 5 tickets per month
+- 問券每店只取**最高分**一次
+- 同分以**提交時間較早**者優先
+- 雙月常態任務抽獎券上限：**6 張**
 
 ---
 
-# Regional Challenge｜北中南區域競賽
+# Visit Mission｜拜訪任務（社群交流）
 
-**繁體中文：** 依據各區「任務完成率」競賽，不比較積分或進貨量。冠軍區域所有符合資格店家額外獲得 1 張抽獎券。
+**流程：**
+1. 拜訪其他 KMBA 簽約夜間通路店家
+2. 與店內大韓菸草陳列架合照
+3. 透過 **LINE 官方帳號**上傳
+4. **每月 20 日**統一人工審核
 
-**English:** Regions (North/Central/South) compete by task completion rate—not points or purchase volume. The winning region receives 1 extra raffle ticket for all eligible stores.
+**獎勵：**
+- 每拜訪 1 間店 = 1 張抽獎券
+- 每月上限 5 張
+- 雙月上限 10 張
+
+> **注意：** 北中南區域競賽已取消，不再有區域排名競賽，僅保留拜訪任務作為社群交流機制。
 
 ---
 
 # Reward System｜獎勵制度
 
-## 每月排行 Monthly Ranking
+## 每月排行（統一超商商品卡）
 
-| 排名 Rank | 獎勵 Reward |
-|-----------|-------------|
-| TOP 1–10 | 高額超商禮券 / Premium gift voucher |
-| TOP 11–30 | 中額超商禮券 / Mid-tier gift voucher |
-| TOP 31–100 | 參與獎超商禮券 / Participation gift voucher |
+| 排名 | 商品卡 | 加碼抽獎券 |
+|------|--------|------------|
+| TOP 1–20 | 500 元 | 3 張 |
+| TOP 21–40 | 200 元 | 2 張 |
+| TOP 41–100 | 100 元 | 1 張 |
 
-## 雙月抽獎 Bi-monthly Raffle
+- **領獎資格：** 當月至少完成 1 項任務
+- **結算：** 每月月底結算
 
-| 階段 Phase | 累積 Accumulation | 抽獎 Draw | 歸零 Reset |
-|------------|-------------------|-----------|------------|
-| 第一階段 Phase 1 | 8–9 月 Aug–Sep | 10 月 Oct | ✓ |
-| 第二階段 Phase 2 | 10–12 月 Oct–Dec | 2027 年 1 月 Jan 2027 | ✓ |
+## 雙月抽獎
 
-- 每次抽出 15 位店家 / 15 winners per draw
-- 每位 5,000 元超商禮券 / NT$5,000 gift voucher each
+| 累積期間 | 抽獎時間 | 獎項 | 歸零 |
+|----------|----------|------|------|
+| 8–9 月 | 10 月（15 日公布） | 15 位 × 1,000 元 | ✓ |
+| 10–11 月 | 12 月（15 日公布） | 15 位 × 2,000 元 | ✓ |
+
+## 單店雙月抽獎券上限
+
+| 來源 | 雙月上限 |
+|------|----------|
+| 常態任務 | 6 張 |
+| 訪店任務 | 10 張 |
+| **合計** | **16 張** |
 
 ---
 
 # LINE Official Account｜LINE 官方帳號
 
-- 每月任務公告 / Monthly mission announcements
-- 任務回傳 / Mission submissions
-- SurveyCake 入口 / SurveyCake access
-- Visit 回傳 / Visit mission submissions
-- AI 客服 / AI customer service
-- 活動公告 / Event announcements
-- 抽獎資訊 / Raffle information
+- **常態任務公告**（不定時發布，請即時關注）
+- 提交／回覆時間為加分項目，任務一發布請盡快完成
+- 問券／SurveyCake 回傳
+- 拜訪任務照片上傳
+- 圖文選單左側：本月新品資訊
+- 圖文選單右側：線上智慧客服  
+  https://zxcvaden-hub.github.io/KMBA-FAQ/
 
 ---
 
 # AI Persona｜AI 人格
 
-**繁體中文身份：** KT&G 大韓菸草 KMBA菁英計畫官方智慧客服  
-**English Role:** KT&G KMBA Elite Program Official AI Assistant
+**身份：** KT&G 大韓菸草 KMBA菁英計畫官方智慧客服  
+**語氣：** 專業、親切、清楚、不捏造  
+**回覆語言：** 中文問→繁中；英文問→English（不中英對照）
 
-**角色 Role:** 活動顧問 × 任務導航 × 品牌教育助手 / Program advisor × Mission guide × Brand education assistant
-
-**語氣 Tone:** 專業、親切、清楚、不捏造｜Professional, friendly, clear, no fabrication
-
-**回覆語言 Reply Language:** 一律先繁體中文，再附 English 對照｜Traditional Chinese first, then English
-
-**若知識庫沒有答案 If no answer in KB:**
+**若知識庫沒有答案：**
 
 繁體中文：「此問題目前需要由 KMBA 總部專人協助確認，請聯繫您的區域業務。」
-
-English: "This question requires confirmation from KMBA headquarters. Please contact your regional sales representative."
 
 ---
 
 # Guardrail｜安全護欄
 
-不得回答 Do not answer:
-- 香菸售價 / Cigarette retail prices
-- 批發價格 / Wholesale prices
-- 法規判定 / Legal/regulatory judgments
-- 未公告活動 / Unannounced campaigns
-- 捏造資訊 / Fabricated information
+不得回答：
+- 香菸售價／批發價格
+- 法規判定
+- 未公告活動
+- 捏造資訊
 
 ---
 
 # FAQ Quick Reference｜常見問答
 
-**Q: 本月有哪些日常任務？**  
-A（繁中）：四項任務各 250 分，月上限 1000 分：客人推薦、新品陳列、新品 QA、業務 QA。  
-A（EN）：Four missions at 250 pts each (1000 pts/month max): customer recommendation, display photo, product QA, sales QA.
+**Q: 常態任務有哪些？**  
+A：品牌隨堂考問券、客人推薦照片、新品陳列照片；每月上限 300 分。
+
+**Q: 任務什麼時候發？為什麼不定時？**  
+A：常態任務以提交／回覆時間為加分項目，因此不定時透過 LINE 發布；請即時關注官方 LINE 官方帳號。
 
 **Q: 怎麼取得抽獎券？**  
-A（繁中）：日常任務積分 500/750/1000 分可換 1/2/3 張；拜訪任務每店 1 張（月上限 5 張）。  
-A（EN）：Daily points earn tickets at 500/750/1000 pts (1/2/3 tickets). Visit missions earn 1 ticket per store (max 5/month).
+A：常態任務 100/200/300 分兌 1/2/3 張；拜訪任務每店 1 張（月上限 5 張）。
 
-**Q: 拜訪任務怎麼完成？**  
-A（繁中）：拜訪簽約店→與陳列架合照→SurveyCake 上傳→每月審核通過後發券。  
-A（EN）：Visit partner store → photo with display → SurveyCake upload → monthly approval → ticket issued.
+**Q: 商品卡和抽獎券差別？**  
+A：商品卡是排行獎勵（500/200/100 元）；抽獎券是雙月抽獎資格。
 
 **Q: 雙月抽獎什麼時候？**  
-A（繁中）：8–9 月累積 10 月抽；10–12 月累積 2027/1 抽；抽完歸零。  
-A（EN）：Aug–Sep accumulates for Oct draw; Oct–Dec for Jan 2027 draw; tickets reset after each draw.
+A：8–9 月累積 10 月抽（1,000 元×15）；10–11 月累積 12 月抽（2,000 元×15）；抽完歸零。
+
+**Q: 北中南區域競賽還有嗎？**  
+A：已取消，不再有區域排名競賽。現僅保留拜訪任務作為社群交流機制。
 
 ---
 
 # Terminology
 
-- Daily Mission 日常任務
+- Regular Mission 常態任務
 - Visit Mission 拜訪任務
-- Regional Challenge 區域競賽
-- Point System 積分制度
-- Ticket System 抽獎券制度
-- Reward System 獎勵制度
+- Gift Card 統一超商商品卡
+- Raffle Ticket 抽獎券
+- Bi-monthly Draw 雙月抽獎
