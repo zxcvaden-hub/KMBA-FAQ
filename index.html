@@ -313,8 +313,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      flex-shrink: 0;
     }
-    .chips.chips--hidden { display: none; }
     .chip {
       border: 1.5px solid #C5D9F2;
       background: #fff;
@@ -467,12 +467,10 @@
   <script>
     const messagesEl = document.getElementById('messages');
     const typingEl = document.getElementById('typing');
-    const chipsEl = document.getElementById('chips');
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
-    let chipsHidden = false;
     let messageSeq = 0;
 
     function renderAnswerFeedback(box, messageId) {
@@ -503,13 +501,6 @@
       requestAnimationFrame(function () {
         messagesEl.scrollTop = messagesEl.scrollHeight;
       });
-    }
-
-    function hideChips() {
-      if (!chipsHidden) {
-        chipsEl.classList.add('chips--hidden');
-        chipsHidden = true;
-      }
     }
 
     function truncateLabel(text) {
@@ -655,7 +646,6 @@
         addMsg(q, 'user');
         input.value = '';
         addMsg('🍀 幸運星通道開啟中…', 'system');
-        hideChips();
         const dest = code === 'luckydrawsetting' ? 'lucky/index.html' : 'lucky/index.html?view=1';
         setTimeout(function () { window.location.href = dest; }, 700);
         return;
@@ -663,7 +653,6 @@
 
       addMsg(q, 'user');
       input.value = '';
-      hideChips();
       setLoading(true);
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.answer) {

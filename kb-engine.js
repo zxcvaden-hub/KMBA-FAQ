@@ -203,10 +203,10 @@
 
   function bimonthlyDetailsForQuery(query, detailed) {
     const lines = [
-      '8–9 月累積的抽獎券，於 10 月抽獎（15 位 × 1,000 元統一超商商品卡），10/15 公布。',
+      '8–9 月累積的抽獎券，於 10 月抽（15位×1,000元商品卡），10/15 公布。',
     ];
     if (canShowDecemberReward() && detailed) {
-      lines.push('10–11 月累積的抽獎券，於 12 月抽獎（15 位 × 2,000 元統一超商商品卡，雙倍加碼），12/15 公布。');
+      lines.push('10–11 月累積的抽獎券，於 12 月抽（15位×2,000元商品卡，雙倍加碼），12/15 公布。');
     }
     lines.push('每次抽完後，抽獎券會重新計算。');
     return lines;
