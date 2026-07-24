@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- KMBA AI 智慧客服（手機優先）｜抽獎頁 lucky/index.html -->
+<!-- KMBA CLUB 2026 活動小助手（手機優先）｜抽獎頁 lucky/index.html -->
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0066CC" />
   <meta name="format-detection" content="telephone=no" />
-  <title>KMBA菁英計畫 2026 — 智慧客服</title>
+  <title>KMBA菁英計畫 2026 — 活動小助手</title>
   <style>
     :root {
       --blue: #0066CC;
@@ -129,6 +129,132 @@
     .msg-row.bot .msg {
       flex: 1 1 auto;
       min-width: 0;
+    }
+    .msg.bot .msg-conclusion {
+      font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .msg.bot .msg-detail {
+      margin-top: 4px;
+      line-height: 1.55;
+    }
+    .msg.bot .msg-reminder {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: var(--mint);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--blue-dark);
+      line-height: 1.5;
+    }
+    .msg.bot .msg-footer {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .suggestion-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .suggestion-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+      max-width: 100%;
+    }
+    .suggestion-button {
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: left;
+      border: 1.5px solid #C5D9F2;
+      background: #fff;
+      color: var(--blue-dark);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.4;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .suggestion-button:active {
+      background: var(--mint);
+      border-color: var(--blue);
+    }
+    .suggestion-list--options .suggestion-button {
+      border-color: var(--blue);
+      background: #F0F7FF;
+    }
+    .next-step {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--mint);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--blue-dark);
+    }
+    .next-step strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .answer-feedback {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #E6EBF2;
+    }
+    .answer-feedback-title {
+      margin: 0 0 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .answer-feedback-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .answer-feedback-actions button {
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: left;
+      border: 1.5px solid #C5D9F2;
+      background: #fff;
+      color: var(--blue-dark);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.4;
+      touch-action: manipulation;
+    }
+    .answer-feedback-actions button:active:not(:disabled) {
+      background: var(--mint);
+      border-color: var(--blue);
+    }
+    .answer-feedback-actions button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+    @media (max-width: 360px) {
+      .suggestion-list {
+        grid-template-columns: 1fr;
+      }
+      .answer-feedback-actions {
+        grid-template-columns: 1fr;
+      }
     }
     .msg.bot {
       background: var(--card);
@@ -291,20 +417,28 @@
       <div class="header-top">
         <div class="logo"><img src="kmba-logo.png" alt="KMBA LOGO" /></div>
         <div class="header-text">
-          <h1>KMBA菁英計畫 智慧客服</h1>
-          <p>KT&G 大韓菸草 · 活動顧問</p>
+          <h1>KMBA CLUB 活動小助手</h1>
+          <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中/英文｜版本V.0723</span>
+      <span class="badge">繁體中文｜版本 V.0724</span>
     </header>
 
     <div class="messages" id="messages">
       <div class="msg-row bot">
         <img class="msg-avatar" src="kmba-logo.png" alt="KMBA" />
-        <div class="msg bot">您好，我是 KMBA 智慧客服 👋
+        <div class="msg bot" id="welcomeMsg">歡迎使用 KMBA CLUB 活動小助手 👋
 
-可協助了解任務類型與獎勵內容
-請輸入問題，或點選下方分類 👇</div>
+你可以直接用平常說話的方式提問，例如：
+
+「禮券怎麼拿？」
+「100分有幾張抽獎券？」
+「客人推薦照片怎麼拍？」
+「拜訪任務每月最多幾間？」
+
+問題不需要輸入完整名稱，我會協助你找到答案。
+
+若問題較模糊，我會再詢問你想了解的項目。</div>
       </div>
     </div>
 
@@ -325,7 +459,7 @@
         <input id="input" type="text" enterkeyhint="send" placeholder="輸入問題…" autocomplete="off" maxlength="500" />
         <button type="submit" id="send">送出</button>
       </form>
-      <div class="footer-note">繁中／English</div>
+      <div class="footer-note">繁體中文</div>
     </div>
   </div>
 
@@ -339,6 +473,31 @@
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
     let chipsHidden = false;
+    let messageSeq = 0;
+
+    function renderAnswerFeedback(box, messageId) {
+      const wrap = document.createElement('div');
+      wrap.className = 'answer-feedback';
+      wrap.dataset.messageId = String(messageId);
+      const title = document.createElement('p');
+      title.className = 'answer-feedback-title';
+      title.textContent = '以上有回答到你的問題嗎？';
+      wrap.appendChild(title);
+      const actions = document.createElement('div');
+      actions.className = 'answer-feedback-actions';
+      [
+        { type: 'resolved', label: '有，已了解' },
+        { type: 'more', label: '還有其他問題' },
+      ].forEach(function (item) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.feedback = item.type;
+        btn.textContent = item.label;
+        actions.appendChild(btn);
+      });
+      wrap.appendChild(actions);
+      box.appendChild(wrap);
+    }
 
     function scrollToBottom() {
       requestAnimationFrame(function () {
@@ -351,6 +510,105 @@
         chipsEl.classList.add('chips--hidden');
         chipsHidden = true;
       }
+    }
+
+    function truncateLabel(text) {
+      const t = (text || '').trim();
+      return t.length > 18 ? t.slice(0, 18) : t;
+    }
+
+    function buildButtonList(items, className, onClick) {
+      if (!items || !items.length) return null;
+      const wrap = document.createElement('div');
+      wrap.className = 'suggestion-list' + (className ? ' ' + className : '');
+      items.forEach(function (label) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'suggestion-button';
+        btn.textContent = truncateLabel(label);
+        btn.title = label;
+        btn.addEventListener('click', function () { onClick(label); });
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    }
+
+    function addBotMsg(data) {
+      const row = document.createElement('div');
+      row.className = 'msg-row bot';
+      const avatar = document.createElement('img');
+      avatar.className = 'msg-avatar';
+      avatar.src = LOGO_SRC;
+      avatar.alt = 'KMBA';
+      row.appendChild(avatar);
+
+      const box = document.createElement('div');
+      box.className = 'msg bot';
+
+      if (data && data.conclusion) {
+        const conclusion = document.createElement('div');
+        conclusion.className = 'msg-conclusion';
+        conclusion.textContent = data.conclusion;
+        box.appendChild(conclusion);
+      }
+
+      if (data && data.details && data.details.length) {
+        const detail = document.createElement('div');
+        detail.className = 'msg-detail';
+        detail.textContent = data.details.join('\n');
+        box.appendChild(detail);
+      } else if (data && data.reply && !data.conclusion) {
+        const plain = document.createElement('div');
+        plain.textContent = data.reply;
+        box.appendChild(plain);
+      }
+
+      if (data && data.reminder) {
+        const reminder = document.createElement('div');
+        reminder.className = 'msg-reminder';
+        reminder.textContent = data.reminder;
+        box.appendChild(reminder);
+      }
+
+      if (data && data.nextStep) {
+        const next = document.createElement('div');
+        next.className = 'next-step';
+        next.innerHTML = '<strong>接下來可以：</strong><span></span>';
+        next.querySelector('span').textContent = data.nextStep;
+        box.appendChild(next);
+      }
+
+      if (data && data.options && data.options.length) {
+        const optLabel = document.createElement('div');
+        optLabel.className = 'suggestion-label';
+        optLabel.textContent = '請選擇';
+        box.appendChild(optLabel);
+        box.appendChild(buildButtonList(data.options, 'suggestion-list--options', sendMessage));
+      }
+
+      if (data && data.suggestions && data.suggestions.length) {
+        const sugLabel = document.createElement('div');
+        sugLabel.className = 'suggestion-label';
+        sugLabel.textContent = '猜你想問';
+        box.appendChild(sugLabel);
+        box.appendChild(buildButtonList(data.suggestions, '', sendMessage));
+      }
+
+      if (data && data.showFeedback) {
+        messageSeq += 1;
+        renderAnswerFeedback(box, messageSeq);
+      }
+
+      if (data && data.reply && data.conclusion && data.showFeedback) {
+        const footer = document.createElement('div');
+        footer.className = 'msg-footer';
+        footer.textContent = '如需協助請聯繫區域業務 📞';
+        box.appendChild(footer);
+      }
+
+      row.appendChild(box);
+      messagesEl.appendChild(row);
+      scrollToBottom();
     }
 
     function addMsg(text, role) {
@@ -410,13 +668,32 @@
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.answer) {
           const data = KB.answer(q);
-          addMsg(data.reply || '暫時無法回覆，請稍後再試。', 'bot');
+          addBotMsg(data);
         } else {
           addMsg('系統載入中，請重新整理後再試。', 'system');
         }
         setLoading(false);
       }, 280);
     }
+
+    messagesEl.addEventListener('click', function (event) {
+      const button = event.target.closest('[data-feedback]');
+      if (!button || button.disabled) return;
+      const feedbackBox = button.closest('.answer-feedback');
+      if (!feedbackBox || feedbackBox.dataset.submitted === '1') return;
+      feedbackBox.dataset.submitted = '1';
+      feedbackBox.querySelectorAll('button').forEach(function (item) {
+        item.disabled = true;
+      });
+      const type = button.dataset.feedback;
+      setLoading(true);
+      setTimeout(function () {
+        if (typeof KB !== 'undefined' && KB.handleFeedback) {
+          addBotMsg(KB.handleFeedback(type));
+        }
+        setLoading(false);
+      }, 200);
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();

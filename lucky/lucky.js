@@ -4,8 +4,36 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // Prize awarded to every winner (all 15 are equal).
-  const PRIZE = '價值新台幣 $5,000 元超商禮券';
+  // V0724 bimonthly draw prizes — 統一超商商品卡（all winners receive the same amount).
+  const DEC_DRAW_REVEAL_DATE = new Date('2026-10-01T00:00:00+08:00');
+  const DRAW_PERIODS = {
+    oct: {
+      id: 'oct',
+      prizeBanner: '每位中獎者可獲<b>1,000 元統一超商商品卡</b>（10 月場 × 15 位）',
+      prizeCopy: '每位中獎者可獲 1,000 元統一超商商品卡',
+      defaultSeed: '2026-10-15 威力彩 05-12-18-23-30-37-08',
+    },
+    dec: {
+      id: 'dec',
+      prizeBanner: '每位中獎者可獲<b>2,000 元統一超商商品卡</b>（12 月場雙倍加碼 × 15 位）',
+      prizeCopy: '每位中獎者可獲 2,000 元統一超商商品卡',
+      defaultSeed: '2026-12-15 威力彩 05-12-18-23-30-37-08',
+    },
+  };
+
+  function isDecDrawRevealed() {
+    return new Date() >= DEC_DRAW_REVEAL_DATE;
+  }
+
+  function getSelectedPeriod() {
+    const sel = $('drawPeriod');
+    const id = sel && sel.value === 'dec' && isDecDrawRevealed() ? 'dec' : 'oct';
+    return DRAW_PERIODS[id];
+  }
+
+  function getPrizeCopy(period) {
+    return (period || getSelectedPeriod()).prizeCopy;
+  }
 
   // Where the operator's latest official draw is stored (for viewer mode replay).
   const STORE_KEY = 'kmba_raffle_last';
@@ -51,7 +79,35 @@
     btnCopy: $('btnCopy'),
     btnExportView: $('btnExportView'),
     exportHint: $('exportHint'),
+    drawPeriod: $('drawPeriod'),
+    prizeBanner: $('prizeBanner'),
   };
+
+  function updatePrizeDisplay(period) {
+    const p = period || getSelectedPeriod();
+    if (els.prizeBanner) els.prizeBanner.innerHTML = `🎁 獎項：${p.prizeBanner}`;
+  }
+
+  function initDrawPeriod() {
+    const decOpt = document.getElementById('decPeriodOption');
+    const decBadge = document.getElementById('decBadge');
+    if (!isDecDrawRevealed()) {
+      if (decOpt) decOpt.disabled = true;
+      if (els.drawPeriod) els.drawPeriod.value = 'oct';
+    } else if (decBadge) {
+      decBadge.style.display = '';
+    }
+    if (els.drawPeriod) {
+      els.drawPeriod.addEventListener('change', () => {
+        updatePrizeDisplay();
+        const p = getSelectedPeriod();
+        if (els.seed && !els.seed.value.trim()) els.seed.placeholder = p.defaultSeed;
+      });
+    }
+    updatePrizeDisplay();
+  }
+
+  initDrawPeriod();
 
   // Holds the last successfully parsed + hashed list.
   let state = {
@@ -391,6 +447,8 @@
       seed: r.seed,
       hash: r.hash,
       drawnAt: r.drawnAt,
+      prize: r.prize || getPrizeCopy(),
+      periodId: r.periodId || getSelectedPeriod().id,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -444,8 +502,16 @@
 
     const winners = await drawWinners(state.people, seed, count);
     const drawnAt = new Date().toLocaleString('zh-TW', { hour12: false });
+    const period = getSelectedPeriod();
 
-    state.lastResult = { winners, seed, hash: state.hash, drawnAt };
+    state.lastResult = {
+      winners,
+      seed,
+      hash: state.hash,
+      drawnAt,
+      prize: period.prizeCopy,
+      periodId: period.id,
+    };
     renderResults(state.lastResult);
     confetti.launch();
 
@@ -456,6 +522,8 @@
         seed: seed,
         hash: state.hash,
         drawnAt: drawnAt,
+        prize: period.prizeCopy,
+        periodId: period.id,
       }));
     } catch (e) { /* storage unavailable */ }
 
@@ -469,6 +537,8 @@
 
   function renderResults(result) {
     if (els.winCount) els.winCount.textContent = String(result.winners.length);
+    const period = (result.periodId && DRAW_PERIODS[result.periodId]) || getSelectedPeriod();
+    updatePrizeDisplay(period);
     els.winnerList.innerHTML = '';
     result.winners.forEach((w, i) => {
       const rank = i + 1;
@@ -501,9 +571,10 @@
     if (!state.lastResult) return;
     const r = state.lastResult;
     const rows = [['序號', '區域', '中獎者', '抽獎券數', '獎項']];
-    r.winners.forEach((w, i) => rows.push([i + 1, w.region || '', w.name, w.tickets, PRIZE]));
+    const prize = r.prize || getPrizeCopy();
+    r.winners.forEach((w, i) => rows.push([i + 1, w.region || '', w.name, w.tickets, prize]));
     rows.push([]);
-    rows.push(['獎項', `每位中獎者 ${PRIZE}`]);
+    rows.push(['獎項', prize]);
     rows.push(['名單快照(SHA-256)', r.hash]);
     rows.push(['公開種子', r.seed]);
     rows.push(['開獎時間', r.drawnAt]);
@@ -520,10 +591,11 @@
   function handleCopy() {
     if (!state.lastResult) return;
     const r = state.lastResult;
+    const prize = r.prize || getPrizeCopy();
     const lines = [
       'KMBA菁英計畫 2026 公開抽獎結果',
       `開獎時間：${r.drawnAt}`,
-      `獎項：每位中獎者 ${PRIZE}`,
+      `獎項：${prize}`,
       `名單快照(SHA-256)：${r.hash}`,
       `公開種子：${r.seed}`,
       '',

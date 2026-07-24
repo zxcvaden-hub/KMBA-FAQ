@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!-- ============================================================ -->
+<!-- 【lucky/index.html】= KMBA 幸運星抽獎頁（非客服首頁）         -->
+<!-- AI 客服首頁在根目錄 index.html                              -->
+<!-- ============================================================ -->
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -220,10 +224,11 @@
     </div>
     <div class="hero-caption">
       <div class="tag">公 平 · 公 正 · 公 開 · 可 驗 證</div>
-      <div class="sub">KT&amp;G 大韓菸草 · KMBA菁英計畫 2026 線上抽獎</div>
+      <div class="sub">KT&amp;G 大韓菸草 · KMBA菁英計畫 2026 雙月抽獎（V0724）</div>
       <div class="hero-badges">
         <span>🎲 可驗證隨機</span>
-        <span>⚖️ 加權不放回</span>
+        <span>💳 10月 商品卡1,000元×15</span>
+        <span id="decBadge" style="display:none">💳 12月 商品卡2,000元×15</span>
         <span>🔒 離線運作</span>
       </div>
     </div>
@@ -302,12 +307,21 @@
 
     <!-- Step 2: 種子 -->
     <section class="panel" id="stepSeed">
-      <div class="step-title"><span class="step-no">2</span>輸入公開隨機種子</div>
+      <div class="step-title"><span class="step-no">2</span>選擇場次與公開種子</div>
       <div class="step-hint">
-        建議使用「事先公告的<b>台灣彩券指定期開獎號碼</b>」作為種子（公開、不可預測、無法操控）。<br />
-        例如指定「2026/10/15 威力彩」號碼，開獎後將號碼填入即可。
+        依 V0724 雙月抽獎規則選擇場次。建議使用「事先公告的<b>台灣彩券指定期開獎號碼</b>」作為種子。<br />
+        每次抽完後，抽獎券會重新計算。
       </div>
       <div class="row">
+        <div>
+          <label>雙月抽獎場次</label>
+          <select id="drawPeriod">
+            <option value="oct">10 月場（8–9 月累積）— 15 位 × 1,000 元統一超商商品卡</option>
+            <option value="dec" id="decPeriodOption">12 月場（10–11 月累積）— 15 位 × 2,000 元統一超商商品卡（雙倍加碼）</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
         <div>
           <label>公開種子（彩券期別 + 號碼）</label>
           <input type="text" id="seed" placeholder="例：2026-10-15 威力彩 05-12-18-23-30-37-08" />
@@ -330,7 +344,7 @@
 
       <div class="results" id="results">
         <h3 style="margin:20px 0 10px;color:var(--blue-dark)">🥇 中獎名單（共 <span id="winCount">15</span> 位・獎項相同）</h3>
-        <div class="prize-banner">🎁 獎項：每位中獎者可獲<b>價值新台幣 $5,000 元超商禮券</b></div>
+        <div class="prize-banner" id="prizeBanner">🎁 獎項：每位中獎者可獲<b>1,000 元統一超商商品卡</b>（10 月場 × 15 位）</div>
         <div id="winnerList"></div>
 
         <div class="verify-box">
