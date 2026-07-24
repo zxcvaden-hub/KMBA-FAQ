@@ -883,12 +883,17 @@
     (item.keywords || []).forEach((keyword) => {
       const kn = normalize(keyword);
       if (!kn) return;
-      if (n.includes(kn)) score += kn.length >= 4 ? 5 : 2;
+      // 整句與關鍵字完全相同 → 高優先命中（完整問句）
+      if (n === kn) score += 25;
+      else if (n.includes(kn)) score += kn.length >= 4 ? 5 : 2;
     });
     return score;
   }
 
   function matchKnowledge(query, depth) {
+    // 短詞應走追問，避免误觸長文規則
+    if (resolveTopicClarifyId((query || '').trim())) return null;
+
     const scored = KNOWLEDGE.map((item) => ({
       item,
       score: calculateMatchScore(query, item),
@@ -1037,7 +1042,7 @@
     ranking: {
       '排名怎麼計算': '每月排名怎麼計算？',
       '積分相同怎麼排名': '積分相同怎麼排名？',
-      '如何影響商品卡排名': '每月排名怎麼計算？',
+      '如何影響商品卡排名': '每月積分排行商品卡差別',
     },
     reward: {
       '商品卡怎麼拿': '商品卡怎麼拿',
@@ -1049,71 +1054,129 @@
   const TOPIC_CLARIFICATIONS = [
     {
       id: 'giftCard',
-      terms: ['商品卡', '禮券'],
+      terms: ['商品卡', '禮券', '礼券', '超商卡', '統一禮券'],
       question: '請問你想了解商品卡的哪一項？',
       options: ['怎麼獲得', '每月發放金額', '排名怎麼計算', '完整規則'],
       topic: 'giftCardClarify',
     },
     {
       id: 'raffle',
-      terms: ['抽獎', '抽獎券'],
+      terms: ['抽獎', '抽奖', '抽獎券', '抽奖券', '抽獎票', '摸彩', '摸彩券', '券'],
       question: '請問你想了解抽獎券的哪一項？',
       options: ['積分怎麼換', '拜訪任務有幾張', '什麼時候抽獎', '完整規則'],
       topic: 'raffleClarify',
     },
     {
       id: 'mission',
-      terms: ['任務'],
+      terms: ['任務', '任务'],
       question: '請問你想了解哪一項任務？',
       options: ['品牌隨堂考', '客人推薦照片', '新品陳列照片', '拜訪任務', '全部任務比較'],
       topic: 'missionClarify',
     },
     {
       id: 'photo',
-      terms: ['照片', '推薦照', '陳列'],
+      terms: ['照片', '相片', '拍照', '推薦照', '陳列', '陳列照'],
       question: '請問你想確認哪一種照片？',
       options: ['客人推薦照片', '新品陳列照片', '拜訪任務照片'],
       topic: 'photoClarify',
     },
     {
       id: 'visit',
-      terms: ['拜訪'],
+      terms: ['拜訪', '拜访', '訪店', '互訪', '访店'],
       question: '請問你想了解拜訪任務的哪一項？',
       options: ['怎麼完成', '照片要拍什麼', '每月最多幾間', '可以拿幾張抽獎券'],
       topic: 'visitClarify',
     },
     {
       id: 'points',
-      terms: ['積分'],
+      terms: ['積分', '积分', '分數', '分数'],
       question: '請問你想了解積分的哪一項？',
       options: ['怎麼獲得', '每月最多幾分', '怎麼換抽獎券', '如何影響商品卡排名'],
       topic: 'pointsClarify',
     },
     {
       id: 'reward',
-      terms: ['獎勵'],
+      terms: ['獎勵', '奖励', '獎品', '奖品'],
       question: '請問你想了解哪一部分？',
       options: ['商品卡怎麼拿', '100分有幾張抽獎券', '獎勵有哪些'],
       topic: 'rewardClarify',
     },
     {
       id: 'ranking',
-      terms: ['排名'],
+      terms: ['排名', '排行', '名次'],
       question: '請問你想了解排名的哪一項？',
       options: ['排名怎麼計算', '積分相同怎麼排名', '如何影響商品卡排名'],
       topic: 'rankingClarify',
     },
   ];
 
-  const TOPIC_ONLY_TERMS = [
-    '商品卡', '禮券', '獎勵', '排名', '積分', '抽獎', '抽獎券',
-    '任務', '照片', '拜訪', '隨堂考', '陳列', '推薦照',
-  ];
+  // 短詞同義詞 → 追問主題（僅整句完全命中時生效）
+  const TOPIC_ALIASES = {
+    商品卡: 'giftCard',
+    禮券: 'giftCard',
+    礼券: 'giftCard',
+    超商卡: 'giftCard',
+    統一禮券: 'giftCard',
+    獎勵: 'reward',
+    奖励: 'reward',
+    獎品: 'reward',
+    奖品: 'reward',
+    排名: 'ranking',
+    排行: 'ranking',
+    名次: 'ranking',
+    積分: 'points',
+    积分: 'points',
+    分數: 'points',
+    分数: 'points',
+    抽獎: 'raffle',
+    抽奖: 'raffle',
+    抽獎券: 'raffle',
+    抽奖券: 'raffle',
+    抽獎票: 'raffle',
+    摸彩: 'raffle',
+    摸彩券: 'raffle',
+    券: 'raffle',
+    任務: 'mission',
+    任务: 'mission',
+    照片: 'photo',
+    相片: 'photo',
+    拍照: 'photo',
+    推薦照: 'photo',
+    陳列: 'photo',
+    陳列照: 'photo',
+    拜訪: 'visit',
+    拜访: 'visit',
+    訪店: 'visit',
+    访店: 'visit',
+    互訪: 'visit',
+  };
+
+  function resolveTopicClarifyId(raw) {
+    const text = (raw || '').trim();
+    if (!text) return null;
+    const n = normalize(text);
+    // 僅處理短輸入（完整句子留給知識庫）
+    if (n.length > 10) return null;
+
+    if (Object.prototype.hasOwnProperty.call(TOPIC_ALIASES, n)) {
+      return TOPIC_ALIASES[n];
+    }
+    if (Object.prototype.hasOwnProperty.call(TOPIC_ALIASES, text)) {
+      return TOPIC_ALIASES[text];
+    }
+
+    for (let i = 0; i < TOPIC_CLARIFICATIONS.length; i++) {
+      const item = TOPIC_CLARIFICATIONS[i];
+      for (let j = 0; j < item.terms.length; j++) {
+        const term = item.terms[j];
+        if (normalize(term) === n || text === term) return item.id;
+      }
+    }
+    return null;
+  }
 
   function isTopicOnlyInput(input) {
-    const raw = (input || '').trim();
-    const n = normalize(raw);
-    return TOPIC_ONLY_TERMS.some((term) => normalize(term) === n || raw === term);
+    return resolveTopicClarifyId(input) !== null;
   }
 
   function buildOptionMap(clarifyId, options) {
@@ -1126,15 +1189,10 @@
   }
 
   function handleTopicOnlyInput(query) {
-    const raw = query.trim();
-    const n = normalize(raw);
-    const matched = TOPIC_CLARIFICATIONS.find((item) =>
-      item.terms.some((term) => normalize(term) === n || raw === term),
-    );
-    if (!matched) {
-      if (n === normalize('隨堂考') || raw === '隨堂考') return null;
-      return null;
-    }
+    const clarifyId = resolveTopicClarifyId(query);
+    if (!clarifyId) return null;
+    const matched = TOPIC_CLARIFICATIONS.find((item) => item.id === clarifyId);
+    if (!matched) return null;
     const optionMap = buildOptionMap(matched.id, matched.options);
     setChatOptions(matched.topic, matched.options, { optionMap, clarifyId: matched.id });
     return {
@@ -1404,6 +1462,6 @@
     canShowDecemberReward,
     sanitizeVisibleAnswer,
     getAnswerDepth,
-    _debug: { normalize, KNOWLEDGE, matchKnowledge, getChatContext, isTopicOnlyInput },
+    _debug: { normalize, KNOWLEDGE, matchKnowledge, getChatContext, isTopicOnlyInput, resolveTopicClarifyId },
   };
 })(window);
