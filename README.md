@@ -160,7 +160,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 ### Web App URL（前端使用 `/exec`）
 
 ```
-https://script.google.com/macros/s/AKfycbxDxNpyIg9Y_Jmn8qAu-GXXlybGpzy5GO9yUHfxmXQu1Q-zWYq2_BT3O07xkchwn4H3Kw/exec
+https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0ObrlhmxTo_LN_bEnWVUSvwa1ND0GQ/exec
 ```
 
 請使用 **`/exec`** 正式部署網址，不要使用 `/dev` 測試網址。
