@@ -940,7 +940,11 @@
     const second = scored[1];
     if (second && top.score - second.score <= 2 && top.score < 15) return null;
     if (top.score < 2) return null;
-    return top.item.get(depth, query);
+    return {
+      formatted: top.item.get(depth, query),
+      faqId: top.item.id,
+      category: top.item.topic,
+    };
   }
 
   function isAmbiguousOnly(query) {
@@ -1259,7 +1263,36 @@
     };
   }
 
-  function packResult(formatted, intent) {
+  function resolveTracking(intent, formatted, tracking) {
+    if (tracking && tracking.faqId) {
+      return {
+        faqId: tracking.faqId,
+        category: tracking.category || 'unknown',
+      };
+    }
+    switch (intent) {
+      case 'welcome':
+        return { faqId: 'welcome', category: 'system' };
+      case 'greeting':
+        return { faqId: 'greeting', category: 'system' };
+      case 'clarify':
+        return { faqId: 'clarify', category: (formatted && formatted.optionTopic) || 'clarify' };
+      case 'fallback':
+        return { faqId: 'fallback', category: 'unknown' };
+      case 'guardrail':
+        return { faqId: 'guardrail', category: 'guardrail' };
+      case 'photoValidate':
+        return { faqId: 'photo_validation', category: 'photo' };
+      case 'feedback':
+        return { faqId: 'feedback', category: 'system' };
+      case 'matched':
+        return { faqId: 'matched', category: 'unknown' };
+      default:
+        return { faqId: intent || 'unknown', category: 'unknown' };
+    }
+  }
+
+  function packResult(formatted, intent, tracking) {
     const hasOptions = formatted.options && formatted.options.length;
     const noFeedbackIntents = ['clarify', 'welcome', 'greeting', 'fallback', 'guardrail', 'photoValidate', 'feedback'];
     const showFeedback = formatted.showFeedback !== false
@@ -1267,6 +1300,7 @@
       && !hasOptions
       && !!(formatted.conclusion);
     const reply = buildReplyText(formatted, intent !== 'feedback' && intent !== 'welcome' && intent !== 'greeting');
+    const track = resolveTracking(intent, formatted, tracking);
     return {
       reply,
       conclusion: formatted.conclusion,
@@ -1278,6 +1312,8 @@
       optionTopic: formatted.optionTopic || null,
       showFeedback,
       intent: intent || null,
+      faqId: track.faqId,
+      category: track.category,
     };
   }
 
@@ -1392,7 +1428,12 @@
 
     if (isTopicOnlyInput(query)) {
       const topicClarify = handleTopicOnlyInput(query);
-      if (topicClarify) return packResult(topicClarify, 'clarify');
+      if (topicClarify) {
+        return packResult(topicClarify, 'clarify', {
+          faqId: 'clarify',
+          category: topicClarify.optionTopic || 'clarify',
+        });
+      }
     }
 
     const FALLBACK_MAP = {
@@ -1428,7 +1469,10 @@
     const matched = matchKnowledge(query, depth);
     if (matched) {
       clearChatContext();
-      return packResult(matched, 'matched');
+      return packResult(matched.formatted, 'matched', {
+        faqId: matched.faqId,
+        category: matched.category,
+      });
     }
 
     const amb = isAmbiguousOnly(query);

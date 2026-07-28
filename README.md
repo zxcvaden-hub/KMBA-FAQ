@@ -91,6 +91,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | `lucky/lucky.js` | 抽獎邏輯（10 月 1,000／12 月 2,000 元商品卡） |
 | `lucky/banner.png` | 抽獎頁橫幅 |
 | `KMBA_CLUB_2026_MASTER_KNOWLEDGE_BASE_V1.0.md` | 內部知識庫參考 |
+| `google-apps-script-Code.gs` | Google Apps Script 原始碼（手動貼上部署，非 Pages 執行） |
 
 ### 隱藏抽獎入口（chatbot 輸入）
 
@@ -124,7 +125,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
-| **V.0728** | 2026/07/28 | 新增「雙月抽獎獎項」FAQ；獎勵／抽獎規則回答附商品卡獎項摘要；歡迎頁「熱門問題」快捷；底部快捷列 UI 強化 |
+| **V.0728** | 2026/07/28 | 新增「雙月抽獎獎項」FAQ；獎勵／抽獎規則回答附商品卡獎項摘要；歡迎頁「熱門問題」快捷；底部快捷列 UI 強化；**客服聊天紀錄寫入 Google Sheet** |
 | V.0724 | 2026/07/24 | 十項 FAQ 改善；活動小助手改版；抽獎頁改為商品卡規則；先結論後說明、多輪對話、猜你想問；短詞強化 patch（同義詞追問、精確命中） |
 | V.0723 | 2026/07/23 | 客戶確認版；去除平台名稱；V0723 任務／獎勵規格 |
 | V1.1 | 2026/06 | 語意匹配、手機版 UI |
@@ -134,3 +135,68 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 ## 打包交付
 
 桌面 QA 壓縮檔：`kmba-chatbot-review-0728.zip`（交叉檢查用，含完整 kmba-chatbot）
+
+---
+
+## 客服紀錄後台
+
+活動小助手會將每次問答（不含回饋訊息本身）寫入 Google Sheet **KMBA客服紀錄**，供內部追蹤與分析。
+
+### Google Sheet 欄位（第一列標題）
+
+| 欄 | 名稱 | 說明 |
+|----|------|------|
+| A | 時間 | 寫入當下時間 |
+| B | Session ID | 同一分頁工作階段共用（`kmbaSessionId`） |
+| C | 使用者問題 | 原始提問 |
+| D | AI 回答摘要 | 先結論，最多 500 字 |
+| E | 命中 FAQ | 知識項目 ID（如 `raffle_100`） |
+| F | FAQ 類別 | topic（如 `raffleTicket`） |
+| G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
+| H | 裝置 | 如 `iPhone / Safari` |
+| I | 版本 | 如 `V.0728` |
+| J | 備註 | 含 `messageId=KMBA-MSG-...` |
+
+### Web App URL（前端使用 `/exec`）
+
+```
+https://script.google.com/macros/s/AKfycbxDxNpyIg9Y_Jmn8qAu-GXXlybGpzy5GO9yUHfxmXQu1Q-zWYq2_BT3O07xkchwn4H3Kw/exec
+```
+
+請使用 **`/exec`** 正式部署網址，不要使用 `/dev` 測試網址。
+
+### Session ID 規則
+
+- 儲存在 `sessionStorage`，key 為 `kmbaSessionId`
+- 格式：`KMBA-{timestamp}-{random}`
+- 同一瀏覽器分頁期間共用；新分頁可產生新 ID
+
+### Message ID 與回饋更新
+
+- 每次使用者提問產生唯一 `messageId`（格式 `KMBA-MSG-...`）
+- 寫入 J 欄備註：`messageId=KMBA-MSG-...;intent=matched`
+- **一個問題只新增一列**
+- 點「有，已了解」→ 更新同一列 G 欄為 `YES`
+- 點「還有其他問題」→ 更新同一列 G 欄為 `NO`（不新增第二筆）
+- 回饋後顯示的分類選項**不會**再寫入新紀錄
+
+### Google Apps Script
+
+- 原始碼檔：`google-apps-script-Code.gs`
+- 貼到 [Google Apps Script](https://script.google.com) 專案後，**重新部署** Web App 新版本
+- 若修改 `Code.gs`，必須重新部署才會生效
+- 工作表優先使用「工作表1」；若不存在則自動使用活頁簿第一個工作表
+
+### 失敗處理
+
+- 寫入或更新失敗**不影響**客服回答
+- 一般使用者畫面**不顯示**任何錯誤
+- 開發測試可在瀏覽器 console 查看 `[KMBA Log]` warning
+
+### 不記錄的項目
+
+- 抽獎隱藏指令 `luckydrawsetting` / `luckydrawlist`
+- 回饋按鈕觸發的後續訊息（`intent: feedback`）
+- 歡迎畫面載入（尚未提問）
+
+---

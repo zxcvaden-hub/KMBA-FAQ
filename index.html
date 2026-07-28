@@ -484,7 +484,94 @@
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
-    let messageSeq = 0;
+    const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxDxNpyIg9Y_Jmn8qAu-GXXlybGpzy5GO9yUHfxmXQu1Q-zWYq2_BT3O07xkchwn4H3Kw/exec';
+    const KMBA_APP_VERSION = 'V.0728';
+
+    function getOrCreateSessionId() {
+      const key = 'kmbaSessionId';
+      try {
+        let id = sessionStorage.getItem(key);
+        if (!id) {
+          const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+          id = 'KMBA-' + Date.now() + '-' + random;
+          sessionStorage.setItem(key, id);
+        }
+        return id;
+      } catch (e) {
+        return 'KMBA-' + Date.now() + '-NOSSESS';
+      }
+    }
+
+    function createMessageId() {
+      const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+      return 'KMBA-MSG-' + Date.now() + '-' + random;
+    }
+
+    function getAnswerSummary(data) {
+      const text = (data && data.conclusion) || (data && data.reply) || '';
+      return String(text).replace(/\s+/g, ' ').trim().slice(0, 500);
+    }
+
+    function getDeviceInfo() {
+      const ua = navigator.userAgent || '';
+      let os = 'Other';
+      if (/iPhone/i.test(ua)) os = 'iPhone';
+      else if (/iPad/i.test(ua)) os = 'iPad';
+      else if (/Android/i.test(ua)) os = 'Android';
+      else if (/Windows/i.test(ua)) os = 'Windows';
+      else if (/Macintosh|Mac OS X/i.test(ua)) os = 'macOS';
+
+      let browser = 'Other';
+      if (/Edg\//i.test(ua)) browser = 'Edge';
+      else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = 'Chrome';
+      else if (/Firefox/i.test(ua)) browser = 'Firefox';
+      else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+
+      return (os + ' / ' + browser).slice(0, 100);
+    }
+
+    function buildLogNote(messageId, data) {
+      const parts = ['messageId=' + messageId];
+      if (data && data.intent) parts.push('intent=' + data.intent);
+      return parts.join(';');
+    }
+
+    function shouldLogChat(data) {
+      return !!(data && data.intent !== 'feedback');
+    }
+
+    async function createChatLog(payload) {
+      try {
+        await fetch(KMBA_LOG_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload),
+          keepalive: true,
+        });
+      } catch (error) {
+        console.warn('[KMBA Log] 建立紀錄失敗：', error);
+      }
+    }
+
+    async function updateChatLog(messageId, resolved) {
+      if (!messageId) return;
+      try {
+        await fetch(KMBA_LOG_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'update',
+            messageId: messageId,
+            resolved: resolved,
+            timestamp: new Date().toISOString(),
+            sessionId: getOrCreateSessionId(),
+          }),
+          keepalive: true,
+        });
+      } catch (error) {
+        console.warn('[KMBA Log] 更新紀錄失敗：', error);
+      }
+    }
 
     function renderAnswerFeedback(box, messageId) {
       const wrap = document.createElement('div');
@@ -537,7 +624,8 @@
       return wrap;
     }
 
-    function addBotMsg(data) {
+    function addBotMsg(data, meta) {
+      meta = meta || {};
       const row = document.createElement('div');
       row.className = 'msg-row bot';
       const avatar = document.createElement('img');
@@ -598,9 +686,8 @@
         box.appendChild(buildButtonList(data.suggestions, '', sendMessage));
       }
 
-      if (data && data.showFeedback) {
-        messageSeq += 1;
-        renderAnswerFeedback(box, messageSeq);
+      if (data && data.showFeedback && meta.messageId) {
+        renderAnswerFeedback(box, meta.messageId);
       }
 
       if (data && data.reply && data.conclusion && data.showFeedback) {
@@ -664,13 +751,31 @@
         return;
       }
 
+      const messageId = createMessageId();
+
       addMsg(q, 'user');
       input.value = '';
       setLoading(true);
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.answer) {
           const data = KB.answer(q);
-          addBotMsg(data);
+          addBotMsg(data, { messageId: messageId, question: q });
+          if (shouldLogChat(data)) {
+            createChatLog({
+              action: 'create',
+              timestamp: new Date().toISOString(),
+              sessionId: getOrCreateSessionId(),
+              messageId: messageId,
+              question: q,
+              answer: getAnswerSummary(data),
+              faqId: data.faqId || 'unknown',
+              category: data.category || data.optionTopic || 'unknown',
+              resolved: '',
+              device: getDeviceInfo(),
+              version: KMBA_APP_VERSION,
+              note: buildLogNote(messageId, data),
+            });
+          }
         } else {
           addMsg('系統載入中，請重新整理後再試。', 'system');
         }
@@ -688,6 +793,9 @@
         item.disabled = true;
       });
       const type = button.dataset.feedback;
+      const messageId = feedbackBox.dataset.messageId;
+      const resolvedValue = type === 'resolved' ? 'YES' : 'NO';
+      updateChatLog(messageId, resolvedValue);
       setLoading(true);
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.handleFeedback) {
