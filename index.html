@@ -486,21 +486,20 @@
     const LOGO_SRC = 'kmba-logo.png';
     const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxDxNpyIg9Y_Jmn8qAu-GXXlybGpzy5GO9yUHfxmXQu1Q-zWYq2_BT3O07xkchwn4H3Kw/exec';
     const KMBA_APP_VERSION = 'V.0728';
+    const KMBA_SESSION_KEY = 'kmbaSessionId';
 
     function getOrCreateSessionId() {
-      const key = 'kmbaSessionId';
-      try {
-        let id = sessionStorage.getItem(key);
-        if (!id) {
-          const random = Math.random().toString(36).slice(2, 8).toUpperCase();
-          id = 'KMBA-' + Date.now() + '-' + random;
-          sessionStorage.setItem(key, id);
-        }
-        return id;
-      } catch (e) {
-        return 'KMBA-' + Date.now() + '-NOSSESS';
+      let id = sessionStorage.getItem(KMBA_SESSION_KEY);
+      if (!id) {
+        const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+        id = 'KMBA-' + Date.now() + '-' + random;
+        sessionStorage.setItem(KMBA_SESSION_KEY, id);
       }
+      return id;
     }
+
+    const KMBA_SESSION_ID = getOrCreateSessionId();
+    console.log('[KMBA Session]', KMBA_SESSION_ID);
 
     function createMessageId() {
       const random = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -530,17 +529,12 @@
       return (os + ' / ' + browser).slice(0, 100);
     }
 
-    function buildLogNote(messageId, data) {
-      const parts = ['messageId=' + messageId];
-      if (data && data.intent) parts.push('intent=' + data.intent);
-      return parts.join(';');
-    }
-
     function shouldLogChat(data) {
       return !!(data && data.intent !== 'feedback');
     }
 
     async function createChatLog(payload) {
+      console.log('[Create]', payload);
       try {
         await fetch(KMBA_LOG_ENDPOINT, {
           method: 'POST',
@@ -554,18 +548,23 @@
     }
 
     async function updateChatLog(messageId, resolved) {
-      if (!messageId) return;
+      if (!messageId) {
+        console.warn('[KMBA Log] 更新略過：缺少 messageId');
+        return;
+      }
+      const payload = {
+        action: 'update',
+        messageId: messageId,
+        resolved: resolved,
+        timestamp: new Date().toISOString(),
+        sessionId: KMBA_SESSION_ID,
+      };
+      console.log('[Update]', payload);
       try {
         await fetch(KMBA_LOG_ENDPOINT, {
           method: 'POST',
           mode: 'no-cors',
-          body: JSON.stringify({
-            action: 'update',
-            messageId: messageId,
-            resolved: resolved,
-            timestamp: new Date().toISOString(),
-            sessionId: getOrCreateSessionId(),
-          }),
+          body: JSON.stringify(payload),
           keepalive: true,
         });
       } catch (error) {
@@ -576,7 +575,7 @@
     function renderAnswerFeedback(box, messageId) {
       const wrap = document.createElement('div');
       wrap.className = 'answer-feedback';
-      wrap.dataset.messageId = String(messageId);
+      wrap.dataset.messageId = messageId;
       const title = document.createElement('p');
       title.className = 'answer-feedback-title';
       title.textContent = '以上有回答到你的問題嗎？';
@@ -761,20 +760,21 @@
           const data = KB.answer(q);
           addBotMsg(data, { messageId: messageId, question: q });
           if (shouldLogChat(data)) {
-            createChatLog({
+            const payload = {
               action: 'create',
               timestamp: new Date().toISOString(),
-              sessionId: getOrCreateSessionId(),
+              sessionId: KMBA_SESSION_ID,
               messageId: messageId,
               question: q,
               answer: getAnswerSummary(data),
-              faqId: data.faqId || 'unknown',
+              faqId: data.faqId || data.intent || 'unknown',
               category: data.category || data.optionTopic || 'unknown',
               resolved: '',
               device: getDeviceInfo(),
               version: KMBA_APP_VERSION,
-              note: buildLogNote(messageId, data),
-            });
+              note: 'messageId=' + messageId + ';intent=' + (data.intent || ''),
+            };
+            createChatLog(payload);
           }
         } else {
           addMsg('系統載入中，請重新整理後再試。', 'system');
@@ -794,8 +794,11 @@
       });
       const type = button.dataset.feedback;
       const messageId = feedbackBox.dataset.messageId;
-      const resolvedValue = type === 'resolved' ? 'YES' : 'NO';
-      updateChatLog(messageId, resolvedValue);
+      if (type === 'resolved') {
+        updateChatLog(messageId, 'YES');
+      } else if (type === 'more') {
+        updateChatLog(messageId, 'NO');
+      }
       setLoading(true);
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.handleFeedback) {
