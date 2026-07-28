@@ -304,11 +304,19 @@
     .bottom-panel {
       flex-shrink: 0;
       background: #fff;
-      border-top: 1px solid #EEF2F7;
+      border-top: 2px solid #D7E3F4;
+      box-shadow: 0 -4px 16px rgba(0, 76, 153, 0.08);
       padding-bottom: var(--safe-bottom);
     }
+    .chips-label {
+      padding: 10px 12px 0;
+      background: var(--soft);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue-dark);
+    }
     .chips {
-      padding: 8px 12px 0;
+      padding: 6px 12px 0;
       background: var(--soft);
       display: flex;
       flex-direction: column;
@@ -421,38 +429,43 @@
           <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中文｜版本 V.0724</span>
+      <span class="badge">繁體中文｜版本 V.0728</span>
     </header>
 
     <div class="messages" id="messages">
       <div class="msg-row bot">
         <img class="msg-avatar" src="kmba-logo.png" alt="KMBA" />
-        <div class="msg bot" id="welcomeMsg">歡迎使用 KMBA CLUB 活動小助手 👋
+        <div class="msg bot">
+        <div id="welcomeMsg">歡迎使用 KMBA CLUB 活動小助手 👋
 
-你可以直接用平常說話的方式提問，例如：
+你可以直接提問，或點下方快捷按鈕：
 
-「禮券怎麼拿？」
+「雙月抽獎獎項有哪些？」
+「獎勵有哪些」
 「100分有幾張抽獎券？」
-「客人推薦照片怎麼拍？」
-「拜訪任務每月最多幾間？」
-
-問題不需要輸入完整名稱，我會協助你找到答案。
 
 若問題較模糊，我會再詢問你想了解的項目。</div>
+        <div id="welcomeShortcuts"></div>
+        </div>
       </div>
     </div>
 
     <div class="typing" id="typing"><span></span><span></span><span></span></div>
 
     <div class="bottom-panel">
+      <div class="chips-label">快捷提問</div>
       <div class="chips" id="chips">
-        <button type="button" class="chip" data-q="任務類型解說">
-          📋 任務類型解說
-          <span class="chip-sub">常態任務 · 拜訪任務 · 積分規則</span>
+        <button type="button" class="chip" data-q="雙月抽獎獎項有哪些？">
+          🎰 雙月抽獎獎項
+          <span class="chip-sub">10月 15位×1,000元商品卡 · 12月場 10/1 起公告</span>
         </button>
         <button type="button" class="chip" data-q="獎勵有哪些">
           🎁 獎勵有哪些
           <span class="chip-sub">商品卡 100～500 元 · 抽獎券 · 雙月抽獎</span>
+        </button>
+        <button type="button" class="chip" data-q="任務類型解說">
+          📋 任務類型解說
+          <span class="chip-sub">常態任務 · 拜訪任務 · 積分規則</span>
         </button>
       </div>
       <form class="input-area" id="form">
@@ -694,6 +707,20 @@
         sendMessage(btn.getAttribute('data-q') || '');
       });
     });
+
+    (function renderWelcomeShortcuts() {
+      var host = document.getElementById('welcomeShortcuts');
+      if (!host) return;
+      var label = document.createElement('div');
+      label.className = 'suggestion-label';
+      label.textContent = '熱門問題';
+      host.appendChild(label);
+      host.appendChild(buildButtonList(
+        ['雙月抽獎獎項有哪些？', '獎勵有哪些', '100分有幾張抽獎券？', '任務類型解說'],
+        'suggestion-list--options',
+        sendMessage
+      ));
+    })();
 
     input.addEventListener('focus', scrollToBottom);
     if (window.visualViewport) {

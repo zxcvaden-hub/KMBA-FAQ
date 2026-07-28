@@ -1,4 +1,4 @@
-/* KMBA CLUB 2026 V0724 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V0728 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
@@ -23,6 +23,7 @@
       '積分相同怎麼排名？',
     ],
     raffleTicket: [
+      '雙月抽獎獎項有哪些？',
       '200分有幾張抽獎券？',
       '拜訪任務也有抽獎券嗎？',
       '抽獎券多久會重新計算？',
@@ -212,6 +213,14 @@
     return lines;
   }
 
+  function bimonthlyPrizeConclusion() {
+    let text = '雙月抽獎獎項為統一超商商品卡：10 月場 15 位 × 1,000 元';
+    if (canShowDecemberReward()) {
+      text += '；12 月場 15 位 × 2,000 元（雙倍加碼）';
+    }
+    return text + '。';
+  }
+
   function getChatContext() {
     try {
       const raw = sessionStorage.getItem(CHAT_CONTEXT_KEY);
@@ -352,7 +361,7 @@
           ...bimonthlyDetailsForQuery(query, detailed),
         ];
         return formatAnswer({
-          conclusion: '獎勵分為商品卡（依排行）與抽獎券（依任務累積）。',
+          conclusion: '獎勵分為商品卡（依排行）與抽獎券（依任務累積）。' + bimonthlyPrizeConclusion(),
           details,
           nextStep: step('giftCard'),
           suggestions: RELATED_QUESTIONS.giftCard,
@@ -390,6 +399,33 @@
           );
         }
         return brief;
+      },
+    },
+    {
+      id: 'raffle_prizes',
+      topic: 'raffleTicket',
+      keywords: [
+        '雙月抽獎獎項', '双月抽奖奖项', '抽獎獎項', '抽奖奖项', '抽什麼獎', '抽什么奖',
+        '抽獎抽什麼', '抽奖抽什么', '中獎獎品', '中奖奖品', '中獎可以拿', '獎項有哪些',
+        '奖项有哪些', '獎品有哪些', '摸彩獎項', '摸彩奖项',
+      ],
+      match(n) {
+        return (/獎項|奖项|抽什麼獎|抽什么奖|中獎.*拿|中獎.*得|中獎.*什麼|獎品.*抽|抽獎.*獎|抽奖.*奖|摸彩.*獎/.test(n)
+          || /雙月.*獎|双月.*奖/.test(n))
+          && !/100分|200分|300分|幾張|几张|歸零|重新計|重新计/.test(n);
+      },
+      get(depth, query) {
+        const showDec = canShowDecemberReward();
+        const details = [
+          '抽獎券完成任務累積，每兩個月抽獎一次。',
+          ...bimonthlyDetailsForQuery(query, showDec || depth === 'detailed'),
+        ];
+        return formatAnswer({
+          conclusion: bimonthlyPrizeConclusion(),
+          details,
+          nextStep: step('drawTime'),
+          suggestions: RELATED_QUESTIONS.raffleTicket,
+        });
       },
     },
     {
@@ -451,7 +487,7 @@
       match(n) { return /完整.*抽|抽獎規則|抽奖规则|雙月.*規|双月.*规/.test(n); },
       get(depth, query) {
         return formatAnswer({
-          conclusion: '抽獎券依積分兌換，每兩個月抽獎一次。',
+          conclusion: '抽獎券依積分兌換，每兩個月抽獎一次。' + bimonthlyPrizeConclusion(),
           details: [
             '100 分 → 1 張；200 分 → 2 張；300 分以上 → 3 張。',
             '日常任務每月最多 300 分，兩個月最多 6 張。',
@@ -831,7 +867,7 @@
     },
     抽獎: {
       prompt: '請問你想了解哪一部分？',
-      options: ['100分有幾張抽獎券？', '抽獎券多久重新計算？', '請完整說明抽獎規則'],
+      options: ['雙月抽獎獎項有哪些？', '100分有幾張抽獎券？', '抽獎券多久重新計算？', '請完整說明抽獎規則'],
       topic: 'raffleSelect',
     },
     獎品: {
@@ -1014,6 +1050,8 @@
       '拜訪任務有幾張': '拜訪一間有幾張券',
       '什麼時候抽獎': '請完整說明抽獎規則',
       '完整規則': '請完整說明抽獎規則',
+      '雙月抽獎獎項有哪些？': '雙月抽獎獎項有哪些？',
+      '獎項有哪些': '雙月抽獎獎項有哪些？',
     },
     mission: {
       '品牌隨堂考': '品牌隨堂考',
@@ -1063,7 +1101,7 @@
       id: 'raffle',
       terms: ['抽獎', '抽奖', '抽獎券', '抽奖券', '抽獎票', '摸彩', '摸彩券', '券'],
       question: '請問你想了解抽獎券的哪一項？',
-      options: ['積分怎麼換', '拜訪任務有幾張', '什麼時候抽獎', '完整規則'],
+      options: ['積分怎麼換', '拜訪任務有幾張', '雙月抽獎獎項有哪些？', '什麼時候抽獎', '完整規則'],
       topic: 'raffleClarify',
     },
     {
