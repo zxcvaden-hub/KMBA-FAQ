@@ -349,8 +349,8 @@
     {
       id: 'rewards_guide',
       topic: 'giftCard',
-      keywords: ['獎勵有哪些', '奖励有哪些', '獎勵解說', '奖励解说'],
-      match(n) { return /獎勵有哪些|奖励有哪些|獎勵解說/.test(n); },
+      keywords: ['獎勵解說', '奖励解说'],
+      match(n) { return /獎勵解說/.test(n); },
       get(depth, query) {
         const detailed = depth === 'detailed';
         const details = [
@@ -1087,9 +1087,9 @@
       '如何影響商品卡排名': '每月積分排行商品卡差別',
     },
     reward: {
-      '商品卡怎麼拿': '商品卡怎麼拿',
+      '日常任務獎項-商品卡怎麼拿': '商品卡怎麼拿',
       '100分有幾張抽獎券': '100分有幾張抽獎券',
-      '獎勵有哪些': '獎勵有哪些',
+      '抽獎獎項-1000元商品卡15位': '雙月抽獎獎項有哪些？',
     },
   };
 
@@ -1140,7 +1140,11 @@
       id: 'reward',
       terms: ['獎勵', '奖励', '獎品', '奖品'],
       question: '請問你想了解哪一部分？',
-      options: ['商品卡怎麼拿', '100分有幾張抽獎券', '獎勵有哪些'],
+      options: [
+        '日常任務獎項-商品卡怎麼拿',
+        '100分有幾張抽獎券',
+        '抽獎獎項-1000元商品卡15位',
+      ],
       topic: 'rewardClarify',
     },
     {
@@ -1193,16 +1197,31 @@
     互訪: 'visit',
   };
 
+  function isExactKnowledgePhrase(raw) {
+    const text = (raw || '').trim();
+    if (!text) return false;
+    const n = normalize(text);
+    for (let i = 0; i < KNOWLEDGE.length; i++) {
+      const item = KNOWLEDGE[i];
+      if (item.keywords) {
+        for (let j = 0; j < item.keywords.length; j++) {
+          const keyword = item.keywords[j];
+          if (keyword === text || normalize(keyword) === n) return true;
+        }
+      }
+      if (item.match && item.match(n)) return true;
+    }
+    return false;
+  }
+
   function resolveTopicClarifyId(raw) {
     const text = (raw || '').trim();
     if (!text) return null;
+    if (isExactKnowledgePhrase(text)) return null;
     const n = normalize(text);
     // 僅處理短輸入（完整句子留給知識庫）
     if (n.length > 10) return null;
 
-    if (Object.prototype.hasOwnProperty.call(TOPIC_ALIASES, n)) {
-      return TOPIC_ALIASES[n];
-    }
     if (Object.prototype.hasOwnProperty.call(TOPIC_ALIASES, text)) {
       return TOPIC_ALIASES[text];
     }
@@ -1211,7 +1230,7 @@
       const item = TOPIC_CLARIFICATIONS[i];
       for (let j = 0; j < item.terms.length; j++) {
         const term = item.terms[j];
-        if (normalize(term) === n || text === term) return item.id;
+        if (text === term) return item.id;
       }
     }
     return null;
@@ -1424,6 +1443,19 @@
         clearChatContext();
         return answer(mapped);
       }
+    }
+
+    if (query === '獎勵有哪些' || query === '奖励有哪些') {
+      const rewardOptions = [
+        '日常任務獎項-商品卡怎麼拿',
+        '100分有幾張抽獎券',
+        '抽獎獎項-1000元商品卡15位',
+      ];
+      return packResult(
+        clarifyResponse('請問你想了解哪一部分？', rewardOptions, 'rewardClarify', 'reward'),
+        'clarify',
+        { faqId: 'clarify', category: 'rewardClarify' }
+      );
     }
 
     if (isTopicOnlyInput(query)) {
