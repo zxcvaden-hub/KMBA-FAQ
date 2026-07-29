@@ -1,4 +1,4 @@
-/* KMBA CLUB 2026 V0729 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V0730 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
@@ -391,7 +391,8 @@
       keywords: ['禮券怎麼獲得', '礼券怎么获得', '禮券怎麼拿', '商品卡怎麼拿', '怎麼拿禮券', '怎麼拿商品卡', '超商禮券', '統一禮券', '超商卡', '月獎', '排名獎勵', '每月獎勵'],
       match(n) {
         return /禮券.*獲|礼券.*获|禮券.*拿|商品卡.*拿|怎麼.*禮券|怎麼.*商品卡|超商禮券|統一禮券|排名獎勵|每月獎勵|月獎/.test(n)
-          && !/抽獎券|抽奖券/.test(n);
+          && !/抽獎券|抽奖券/.test(n)
+          || (/商品卡|礼券|禮券/.test(n) && /發給|发给|發放|收到|怎麼領|領取/.test(n));
       },
       get(depth) {
         const brief = formatAnswer({
@@ -419,6 +420,45 @@
       },
     },
     {
+      id: 'gift_card_delivery',
+      topic: 'giftCard',
+      keywords: ['商品卡會怎麼發給我', '商品卡怎麼發給我', '商品卡如何發放', '商品卡怎麼領', '怎麼收到商品卡'],
+      match(n) {
+        return /商品卡|礼券|禮券/.test(n) && /發給|发给|發放|收到|怎麼領|領取|寄|通知/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '商品卡依每月積分排行結果發放，請留意活動通知；領取方式請洽詢區域業務。',
+          details: [
+            '需當月完成至少 1 項任務才有排行資格。',
+            '我們發放的是統一超商商品卡，不是禮券或現金。',
+          ],
+          nextStep: step('giftCard'),
+          suggestions: RELATED_QUESTIONS.giftCard.slice(0, 2),
+        });
+      },
+    },
+    {
+      id: 'gift_card_rank_after_15',
+      topic: 'giftCard',
+      keywords: ['15名以後', '15名以后', '第16名', '16名以後', '16名以后', '100名以後', '100名以后'],
+      match(n) {
+        return (/15.*名|第16|16.*名|100.*名|101/.test(n) && /獎勵|奖励|商品卡|禮券|礼券|多少|面額|面额/.test(n))
+          || /15名以[後后]的獎勵/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '第 16～20 名仍為 500 元商品卡；第 21～40 名 200 元；第 41～100 名 100 元。',
+          details: [
+            '第 101 名起不在本次商品卡發放範圍。',
+            '需當月完成至少 1 項任務才有排行資格。',
+          ],
+          nextStep: step('giftCard'),
+          suggestions: RELATED_QUESTIONS.giftCard.slice(0, 2),
+        });
+      },
+    },
+    {
       id: 'raffle_prizes',
       topic: 'raffleTicket',
       keywords: [
@@ -429,7 +469,8 @@
       match(n) {
         return (/獎項|奖项|抽什麼獎|抽什么奖|中獎.*拿|中獎.*得|中獎.*什麼|獎品.*抽|抽獎.*獎|抽奖.*奖|摸彩.*獎/.test(n)
           || /雙月.*獎|双月.*奖/.test(n))
-          && !/100分|200分|300分|幾張|几张|歸零|重新計|重新计/.test(n);
+          && !/100分|200分|300分|幾張|几张|歸零|重新計|重新计/.test(n)
+          && !/公平|公正|黑箱|作弊/.test(n);
       },
       get(depth, query) {
         const showDec = canShowDecemberReward();
@@ -451,7 +492,8 @@
       keywords: ['抽獎公平', '抽奖公平', '抽獎機制', '抽奖机制', '公平性', '公正'],
       match(n) {
         return (/公平|公正|作弊|黑箱/.test(n) && /抽獎|抽奖|抽獎券|抽奖券|摸彩/.test(n))
-          || /抽獎機制|抽奖机制/.test(n);
+          || /抽獎機制|抽奖机制/.test(n)
+          || (/抽獎|抽奖/.test(n) && /公平|公正/.test(n));
       },
       get() {
         return formatAnswer({
@@ -468,16 +510,17 @@
     {
       id: 'visit_partner_stores',
       topic: 'visitTask',
-      keywords: ['合作店家', '合作店', '簽約店家', '可以拜訪哪些', '哪些店家', '哪些店'],
+      keywords: ['合作店家', '合作店', '簽約店家', '可以拜訪哪些', '哪些店家', '哪些店', '會通知', '通知店家'],
       match(n) {
-        return (/合作|簽約/.test(n) && /店|店家/.test(n) && /拜訪|訪店|哪些|哪幾/.test(n))
-          || /拜訪.*哪些.*店|哪些.*簽約/.test(n);
+        return (/合作|簽約/.test(n) && /店|店家/.test(n) && /拜訪|訪店|哪些|哪幾|通知|會通知/.test(n))
+          || /拜訪.*哪些.*店|哪些.*簽約/.test(n)
+          || (/通知/.test(n) && /拜訪|店家|店/.test(n));
       },
       get() {
         return formatAnswer({
-          conclusion: '拜訪任務需前往其他 KMBA 簽約店家完成，不可拜訪自己的店。',
+          conclusion: '拜訪任務需前往其他 KMBA 簽約店家完成；合作店家名單不會逐店推送，請向區域業務確認。',
           details: [
-            '合作店家為 KMBA 簽約店家，實際可拜訪名單請向區域業務確認。',
+            '不可拜訪自己的店，需到其他簽約店家完成指定拍照。',
             '到達後與該店 KT&G 陳列架合照，並在 LINE 上傳。',
             '每完成一間 → 1 張抽獎券，每月最多 5 間。',
           ],
@@ -682,7 +725,7 @@
     {
       id: 'visit_photo_bare',
       topic: 'visitTask',
-      keywords: ['拜訪任務照片'],
+      keywords: ['拜訪任務照片', '拜訪照片'],
       match(n) { return n === '拜訪任務照片' || n === '拜訪照片'; },
       get() {
         return formatAnswer({
@@ -747,6 +790,29 @@
             '新品被遮擋、過小或無法辨識，較可能無法通過審核。',
           ],
           nextStep: step('photoReview'),
+          suggestions: RELATED_QUESTIONS.customerPhoto.slice(0, 2),
+        });
+      },
+    },
+    {
+      id: 'customer_photo_definition',
+      topic: 'customerPhoto',
+      keywords: [
+        '客人推薦照片的定義', '客人推薦照片是什麼', '客人推薦照片定義',
+        '推薦照片的定義', '請問客人推薦照片的定義',
+      ],
+      match(n) {
+        return (/客人推薦|推薦照片/.test(n) && /定義|是什么|是什麼|意思|指的是/.test(n))
+          || /客人推薦照片的定義/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '客人推薦照片是指呈現向客人推薦當月新品的互動情境，不是只有產品或只有店員。',
+          details: [
+            '畫面中需有客人、當月新品，以及 Bartender 或主理人的推薦互動。',
+            '照片需清楚明亮，主要人物與新品可辨識。',
+          ],
+          nextStep: step('customerPhoto'),
           suggestions: RELATED_QUESTIONS.customerPhoto.slice(0, 2),
         });
       },
@@ -1007,9 +1073,30 @@
     return score;
   }
 
+  function findExactKeywordMatch(query, depth) {
+    const raw = (query || '').trim();
+    if (!raw) return null;
+    for (let i = 0; i < KNOWLEDGE.length; i++) {
+      const item = KNOWLEDGE[i];
+      for (let j = 0; j < (item.keywords || []).length; j++) {
+        if (raw === item.keywords[j]) {
+          return {
+            formatted: item.get(depth, query),
+            faqId: item.id,
+            category: item.topic,
+          };
+        }
+      }
+    }
+    return null;
+  }
+
   function matchKnowledge(query, depth) {
     // 短詞應走追問，避免误觸長文規則
     if (resolveTopicClarifyId((query || '').trim())) return null;
+
+    const exact = findExactKeywordMatch(query, depth);
+    if (exact) return exact;
 
     const scored = KNOWLEDGE.map((item) => ({
       item,
