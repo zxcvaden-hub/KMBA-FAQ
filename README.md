@@ -1,7 +1,7 @@
 # KMBA CLUB 2026 — 活動小助手
 
 KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜態網站）。  
-**目前版本：V.0728**
+**目前版本：V.0731**
 
 **線上版本：** [https://zxcvaden-hub.github.io/KMBA-FAQ/](https://zxcvaden-hub.github.io/KMBA-FAQ/)
 
@@ -43,6 +43,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 - 第 1～20 名：500 元商品卡
 - 第 21～40 名：200 元商品卡
 - 第 41～100 名：100 元商品卡
+- 第 101 名起：不在本次商品卡發放範圍
 
 ### 雙月抽獎（統一超商商品卡）
 
@@ -51,10 +52,17 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
   → **2026/10/01 以前**，小助手不主動顯示 12 月場資訊
 - 每次抽完後，**抽獎券會重新計算**
 
+**公平性機制（對外說法）：**
+
+- 以台灣彩券開獎號碼作為種子，透過固定公式產生中獎名單
+- 10 月場與 12 月場皆全程螢幕錄影，中獎名單於活動網頁公開公布
+- 抽獎券依任務累積，券越多中獎機會越高；同一人最多中獎一次
+
 ### 拜訪任務
 
 - 前往其他 KMBA 簽約店家拍照，LINE 上傳，每月 20 日審核
 - 每完成一間店 → 1 張抽獎券（每月最多 5 間，每兩個月最多 10 間）
+- 合作店家名單不會逐店推送，請向區域業務確認
 - **無積分**，僅獲抽獎券
 
 ### 北中南區域競賽
@@ -85,13 +93,14 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | 檔案／目錄 | 用途 |
 |------------|------|
 | `index.html` | 活動小助手聊天介面（手機優先） |
-| `kb-engine.js` | 問答引擎（V.0728） |
+| `kb-engine.js` | 問答引擎（V.0731） |
 | `kmba-logo.png` | LOGO 大頭貼 |
 | `lucky/index.html` | 雙月抽獎工具頁（操作端／觀看端，非公開入口） |
-| `lucky/lucky.js` | 抽獎邏輯（10 月 1,000／12 月 2,000 元商品卡） |
+| `lucky/lucky.js` | 抽獎邏輯（加權不放回、彩券種子、可驗證） |
 | `lucky/banner.png` | 抽獎頁橫幅 |
 | `KMBA_CLUB_2026_MASTER_KNOWLEDGE_BASE_V1.0.md` | 內部知識庫參考 |
 | `google-apps-script-Code.gs` | Google Apps Script 原始碼（手動貼上部署，非 Pages 執行） |
+| `generate-architecture-doc.py` | 產生架構 Word 文件 |
 
 ### 隱藏抽獎入口（chatbot 輸入）
 
@@ -125,8 +134,11 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
-| **V.0728** | 2026/07/28 | 新增「雙月抽獎獎項」FAQ；獎勵／抽獎規則回答附商品卡獎項摘要；歡迎頁「熱門問題」快捷；底部快捷列 UI 強化；**客服聊天紀錄寫入 Google Sheet** |
-| V.0724 | 2026/07/24 | 十項 FAQ 改善；活動小助手改版；抽獎頁改為商品卡規則；先結論後說明、多輪對話、猜你想問；短詞強化 patch（同義詞追問、精確命中） |
+| **V.0731** | 2026/07/29 | 抽獎公平 FAQ：台灣彩券種子、固定公式、10/12 月場全程螢幕錄影並公布 |
+| V.0730 | 2026/07/29 | 依客服紀錄分析修補 FAQ：照片新品、15名以後、客人推薦定義、商品卡發放、拜訪店家通知、精準關鍵字匹配 |
+| V.0729 | 2026/07/29 | UX：滾至回覆頂部、對話後隱藏 chips；「獎勵有哪些」直接完整回答；新增 photo_need_new_product、raffle_fairness、visit_partner_stores |
+| V.0728 | 2026/07/28 | 新增「雙月抽獎獎項」FAQ；獎勵／抽獎規則回答附商品卡獎項摘要；歡迎頁「熱門問題」快捷；**客服聊天紀錄寫入 Google Sheet** |
+| V.0724 | 2026/07/24 | 十項 FAQ 改善；活動小助手改版；抽獎頁改為商品卡規則；先結論後說明、多輪對話、猜你想問 |
 | V.0723 | 2026/07/23 | 客戶確認版；去除平台名稱；V0723 任務／獎勵規格 |
 | V1.1 | 2026/06 | 語意匹配、手機版 UI |
 
@@ -134,7 +146,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 ## 打包交付
 
-桌面 QA 壓縮檔：`kmba-chatbot-review-0728.zip`（交叉檢查用，含完整 kmba-chatbot）
+桌面交付壓縮檔：`大韓菸草客服20260729.zip`（含完整 kmba-chatbot 與架構 Word 文件）
 
 ---
 
@@ -150,11 +162,11 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | B | Session ID | 同一分頁工作階段共用（`kmbaSessionId`） |
 | C | 使用者問題 | 原始提問 |
 | D | AI 回答摘要 | 先結論，最多 500 字 |
-| E | 命中 FAQ | 知識項目 ID（如 `raffle_100`） |
+| E | 命中 FAQ | 知識項目 ID（如 `raffle_fairness`） |
 | F | FAQ 類別 | topic（如 `raffleTicket`） |
 | G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
 | H | 裝置 | 如 `iPhone / Safari` |
-| I | 版本 | 如 `V.0728` |
+| I | 版本 | 如 `V.0731` |
 | J | 備註 | 含 `messageId=KMBA-MSG-...` |
 
 ### Web App URL（前端使用 `/exec`）
@@ -200,3 +212,37 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 - 歡迎畫面載入（尚未提問）
 
 ---
+
+## V.0731 FAQ 知識庫摘要（38 項）
+
+| faqId | 類別 | 說明 |
+|-------|------|------|
+| tasks_guide | tasks | 任務類型解說 |
+| rewards_guide | giftCard | 獎勵有哪些（直接完整回答） |
+| gift_card_earn | giftCard | 商品卡怎麼拿 |
+| gift_card_delivery | giftCard | 商品卡發放／領取方式 |
+| gift_card_rank_after_15 | giftCard | 15 名以後商品卡面額 |
+| gift_card_tiers | giftCard | 商品卡級距差別 |
+| ranking_calc | giftCard | 每月排名計算 |
+| ranking_tie | giftCard | 積分相同排名 |
+| raffle_prizes | raffleTicket | 雙月抽獎獎項 |
+| raffle_fairness | raffleTicket | 抽獎公平／機制／螢幕錄影 |
+| raffle_100 / 200 / 300 | raffleTicket | 積分兌換抽獎券 |
+| raffle_rules_full | raffleTicket | 完整抽獎規則 |
+| raffle_reset | raffleTicket | 抽獎券重新計算 |
+| visit_has_ticket | raffleTicket | 拜訪也有抽獎券 |
+| visit_task | visitTask | 拜訪任務說明 |
+| visit_partner_stores | visitTask | 合作店家／會通知嗎 |
+| visit_points | visitTask | 拜訪有積分嗎 |
+| visit_one_ticket | visitTask | 拜訪一間幾張券 |
+| visit_max | visitTask | 每月最多拜訪幾間 |
+| visit_photo_what | visitTask | 拜訪照片要拍什麼 |
+| passport_alias | visitTask | Passport 用語導向 |
+| customer_photo* | customerPhoto | 客人推薦照片規則 |
+| photo_need_new_product | customerPhoto | 照片一定要有新品 |
+| customer_photo_definition | customerPhoto | 客人推薦照片定義 |
+| display_photo* | displayPhoto | 新品陳列照片規則 |
+| quiz_task | tasks | 品牌隨堂考 |
+| monthly_tasks | tasks | 每月有哪些任務 |
+
+詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0731.docx`
