@@ -308,33 +308,37 @@
       box-shadow: 0 -4px 16px rgba(0, 76, 153, 0.08);
       padding-bottom: var(--safe-bottom);
     }
+    .bottom-panel.chips-hidden .chips,
+    .bottom-panel.chips-hidden .chips-label {
+      display: none;
+    }
     .chips-label {
-      padding: 10px 12px 0;
+      padding: 6px 12px 0;
       background: var(--soft);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--blue-dark);
     }
     .chips {
-      padding: 6px 12px 0;
+      padding: 4px 12px 0;
       background: var(--soft);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
     }
     .chip {
       border: 1.5px solid #C5D9F2;
       background: #fff;
       color: var(--blue-dark);
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       text-align: left;
       width: 100%;
-      min-height: 48px;
+      min-height: 36px;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       font-family: inherit;
@@ -345,14 +349,14 @@
     }
     .chip-sub {
       display: block;
-      margin-top: 3px;
-      font-size: 11px;
+      margin-top: 2px;
+      font-size: 10px;
       font-weight: 500;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.35;
     }
     .input-area {
-      padding: 10px 12px 6px;
+      padding: 8px 12px 4px;
       display: flex;
       gap: 8px;
       align-items: center;
@@ -362,11 +366,11 @@
       min-width: 0;
       border: 1px solid #D7E3F4;
       border-radius: 12px;
-      padding: 11px 12px;
+      padding: 9px 12px;
       font-size: 16px;
       outline: none;
       font-family: inherit;
-      min-height: 44px;
+      min-height: 40px;
       -webkit-appearance: none;
     }
     .input-area input:focus {
@@ -429,7 +433,7 @@
           <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中文｜版本 V.0728</span>
+      <span class="badge">繁體中文｜版本 V.0729</span>
     </header>
 
     <div class="messages" id="messages">
@@ -452,7 +456,7 @@
 
     <div class="typing" id="typing"><span></span><span></span><span></span></div>
 
-    <div class="bottom-panel">
+    <div class="bottom-panel" id="bottomPanel">
       <div class="chips-label">快捷提問</div>
       <div class="chips" id="chips">
         <button type="button" class="chip" data-q="雙月抽獎獎項有哪些？">
@@ -485,7 +489,7 @@
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
     const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0ObrlhmxTo_LN_bEnWVUSvwa1ND0GQ/exec';
-    const KMBA_APP_VERSION = 'V.0728';
+    const KMBA_APP_VERSION = 'V.0729';
     const KMBA_SESSION_KEY = 'kmbaSessionId';
 
     function getOrCreateSessionId() {
@@ -609,9 +613,24 @@
       box.appendChild(wrap);
     }
 
+    const bottomPanel = document.getElementById('bottomPanel');
+    let hasChatted = false;
+
+    function setChipsVisible(show) {
+      if (!bottomPanel) return;
+      bottomPanel.classList.toggle('chips-hidden', !show);
+    }
+
     function scrollToBottom() {
       requestAnimationFrame(function () {
         messagesEl.scrollTop = messagesEl.scrollHeight;
+      });
+    }
+
+    function scrollToBotReply(row) {
+      if (!row) return;
+      requestAnimationFrame(function () {
+        row.scrollIntoView({ block: 'start', behavior: 'smooth' });
       });
     }
 
@@ -711,7 +730,7 @@
 
       row.appendChild(box);
       messagesEl.appendChild(row);
-      scrollToBottom();
+      scrollToBotReply(row);
     }
 
     function addMsg(text, role) {
@@ -767,6 +786,8 @@
 
       addMsg(q, 'user');
       input.value = '';
+      hasChatted = true;
+      setChipsVisible(false);
       setLoading(true);
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.answer) {
@@ -858,7 +879,13 @@
       ));
     })();
 
-    input.addEventListener('focus', scrollToBottom);
+    input.addEventListener('focus', function () {
+      setChipsVisible(true);
+      scrollToBottom();
+    });
+    input.addEventListener('blur', function () {
+      if (hasChatted) setChipsVisible(false);
+    });
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', scrollToBottom);
     }

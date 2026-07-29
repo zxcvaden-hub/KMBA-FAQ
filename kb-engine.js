@@ -1,4 +1,4 @@
-/* KMBA CLUB 2026 V0728 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V0729 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
@@ -131,6 +131,19 @@
         .replace(/[？?！!。．，,、；;：:""''「」『』【】（）()[\]{}<>~`@#$%^&*+=|\\/_-]/g, '')
         .replace(STOPWORDS, '')
     );
+  }
+
+  function applyBriefLimit(formatted, depth) {
+    if (depth === 'detailed' || !formatted) return formatted;
+    const copy = Object.assign({}, formatted);
+    if (copy.details && copy.details.length) {
+      copy.details = copy.details.filter(function (line) { return String(line).trim() !== ''; }).slice(0, 5);
+    }
+    copy.nextStep = '';
+    if (copy.suggestions && copy.suggestions.length > 2) {
+      copy.suggestions = copy.suggestions.slice(0, 2);
+    }
+    return copy;
   }
 
   function formatAnswer({ conclusion, details, reminder, nextStep, suggestions, showFeedback }) {
@@ -349,22 +362,26 @@
     {
       id: 'rewards_guide',
       topic: 'giftCard',
-      keywords: ['獎勵解說', '奖励解说'],
-      match(n) { return /獎勵解說/.test(n); },
+      keywords: ['獎勵有哪些', '奖励有哪些', '獎勵解說', '奖励解说'],
+      match(n) { return /獎勵有哪些|奖励有哪些|獎勵解說/.test(n); },
       get(depth, query) {
         const detailed = depth === 'detailed';
-        const details = [
+        const details = detailed ? [
           '【商品卡】依每月積分排行發放（非禮券）',
           ...giftCardTierLines(),
           '',
           '【抽獎券】完成任務累積，參加雙月抽獎',
           ...bimonthlyDetailsForQuery(query, detailed),
-        ];
+        ] : [
+          '【商品卡】依每月積分排行：500 / 200 / 100 元',
+          '【抽獎券】完成任務累積，參加雙月抽獎',
+          bimonthlyDetailsForQuery(query, false)[0] || '',
+        ].filter(Boolean);
         return formatAnswer({
           conclusion: '獎勵分為商品卡（依排行）與抽獎券（依任務累積）。' + bimonthlyPrizeConclusion(),
           details,
-          nextStep: step('giftCard'),
-          suggestions: RELATED_QUESTIONS.giftCard,
+          nextStep: detailed ? step('giftCard') : '',
+          suggestions: RELATED_QUESTIONS.giftCard.slice(0, detailed ? 3 : 2),
         });
       },
     },
@@ -425,6 +442,47 @@
           details,
           nextStep: step('drawTime'),
           suggestions: RELATED_QUESTIONS.raffleTicket,
+        });
+      },
+    },
+    {
+      id: 'raffle_fairness',
+      topic: 'raffleTicket',
+      keywords: ['抽獎公平', '抽奖公平', '抽獎機制', '抽奖机制', '公平性', '公正'],
+      match(n) {
+        return (/公平|公正|作弊|黑箱/.test(n) && /抽獎|抽奖|抽獎券|抽奖券|摸彩/.test(n))
+          || /抽獎機制|抽奖机制/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '雙月抽獎依活動公告方式進行，中獎名單會公開公布，抽完後抽獎券重新計算。',
+          details: [
+            '抽獎券依任務完成與審核結果累積，機會取決於完成任務數量。',
+            '抽獎結果依活動單位公告為準，請留意後續通知。',
+          ],
+          nextStep: step('drawTime'),
+          suggestions: RELATED_QUESTIONS.raffleTicket.slice(0, 2),
+        });
+      },
+    },
+    {
+      id: 'visit_partner_stores',
+      topic: 'visitTask',
+      keywords: ['合作店家', '合作店', '簽約店家', '可以拜訪哪些', '哪些店家', '哪些店'],
+      match(n) {
+        return (/合作|簽約/.test(n) && /店|店家/.test(n) && /拜訪|訪店|哪些|哪幾/.test(n))
+          || /拜訪.*哪些.*店|哪些.*簽約/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '拜訪任務需前往其他 KMBA 簽約店家完成，不可拜訪自己的店。',
+          details: [
+            '合作店家為 KMBA 簽約店家，實際可拜訪名單請向區域業務確認。',
+            '到達後與該店 KT&G 陳列架合照，並在 LINE 上傳。',
+            '每完成一間 → 1 張抽獎券，每月最多 5 間。',
+          ],
+          nextStep: step('visitTask'),
+          suggestions: RELATED_QUESTIONS.visitTask.slice(0, 2),
         });
       },
     },
@@ -667,6 +725,29 @@
           details: checklistBlock('displayPhoto'),
           nextStep: step('displayPhoto'),
           suggestions: RELATED_QUESTIONS.displayPhoto,
+        });
+      },
+    },
+    {
+      id: 'photo_need_new_product',
+      topic: 'customerPhoto',
+      keywords: [
+        '照片裡一定要有新品嗎', '照片一定要有新品', '一定要有新品', '照片裡要有新品',
+        '要保留新品', '照片要保留新品', '照片裡一定要有新品',
+      ],
+      match(n) {
+        return (/照片|相片|拍照/.test(n) && /新品/.test(n))
+          || /一定要有新品|要保留新品|保留新品/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '需要保留新品。照片中需清楚呈現當月新品。',
+          details: [
+            '客人推薦照片與新品陳列照片皆需讓當月新品清楚可見。',
+            '新品被遮擋、過小或無法辨識，較可能無法通過審核。',
+          ],
+          nextStep: step('photoReview'),
+          suggestions: RELATED_QUESTIONS.customerPhoto.slice(0, 2),
         });
       },
     },
@@ -1445,19 +1526,6 @@
       }
     }
 
-    if (query === '獎勵有哪些' || query === '奖励有哪些') {
-      const rewardOptions = [
-        '日常任務獎項-商品卡怎麼拿',
-        '100分有幾張抽獎券',
-        '抽獎獎項-1000元商品卡15位',
-      ];
-      return packResult(
-        clarifyResponse('請問你想了解哪一部分？', rewardOptions, 'rewardClarify', 'reward'),
-        'clarify',
-        { faqId: 'clarify', category: 'rewardClarify' }
-      );
-    }
-
     if (isTopicOnlyInput(query)) {
       const topicClarify = handleTopicOnlyInput(query);
       if (topicClarify) {
@@ -1501,7 +1569,8 @@
     const matched = matchKnowledge(query, depth);
     if (matched) {
       clearChatContext();
-      return packResult(matched.formatted, 'matched', {
+      const formatted = applyBriefLimit(matched.formatted, depth);
+      return packResult(formatted, 'matched', {
         faqId: matched.faqId,
         category: matched.category,
       });
