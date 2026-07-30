@@ -1,7 +1,7 @@
 # KMBA CLUB 2026 — 活動小助手
 
 KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜態網站）。  
-**目前版本：V.0732**
+**目前版本：V.0734**
 
 **線上版本：** [https://zxcvaden-hub.github.io/KMBA-FAQ/](https://zxcvaden-hub.github.io/KMBA-FAQ/)
 
@@ -39,6 +39,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 ### 商品卡（統一超商商品卡，非禮券、非現金）
 
 - 依每月積分排行發放，需當月完成至少 1 項任務
+- **發放方式：** 由區域業務親送或直接發放給店家
 - 排名依積分多寡與提交時間排序
 - 第 1～20 名：500 元商品卡
 - 第 21～40 名：200 元商品卡
@@ -93,7 +94,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | 檔案／目錄 | 用途 |
 |------------|------|
 | `index.html` | 活動小助手聊天介面（手機優先） |
-| `kb-engine.js` | 問答引擎（V.0732） |
+| `kb-engine.js` | 問答引擎（V.0734） |
 | `kmba-logo.png` | LOGO 大頭貼 |
 | `lucky/index.html` | 雙月抽獎工具頁（操作端／觀看端，非公開入口） |
 | `lucky/lucky.js` | 抽獎邏輯（加權不放回、彩券種子、可驗證） |
@@ -117,6 +118,16 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 2. 以手機寬度（320～390px）測試按鈕點擊與「猜你想問」
 3. 測試模糊詞「任務」「照片」是否出現追問選項
 
+### 內部 Debug 模式（不公開給店家）
+
+在網址後加 `?debug=1` 可開啟底部 debug 面板，顯示 Session ID、faqId、Sheet 寫入 payload：
+
+```
+https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
+```
+
+因使用 `no-cors` 寫入，瀏覽器無法讀取 GAS 回應，請至 Google Sheet 確認是否寫入成功。
+
 ---
 
 ## 部署（GitHub Pages）
@@ -134,7 +145,9 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
-| **V.0732** | 2026/07/29 | 抽獎公平 FAQ 文案優化（客戶確認版）；清理本地殘留備份與舊開發檔 |
+| **V.0734** | 2026/07/30 | 修正問題比對停用詞；商品卡發放文案（區域業務親送／直送店家）；`?debug=1` 除錯面板；lucky 頁更新錄影說明 |
+| **V.0733** | 2026/07/30 | 修正 LINE 手機快捷按鈕無反應（pointerdown、按鈕常駐顯示） |
+| **V.0732** | 2026/07/29 | 抽獎公平 FAQ 文案優化（客戶確認版）；清理本地殘留備份 |
 | **V.0731** | 2026/07/29 | 抽獎公平 FAQ：台灣彩券種子、固定公式、10/12 月場全程螢幕錄影並公布 |
 | V.0730 | 2026/07/29 | 依客服紀錄分析修補 FAQ：照片新品、15名以後、客人推薦定義、商品卡發放、拜訪店家通知、精準關鍵字匹配 |
 | V.0729 | 2026/07/29 | UX：滾至回覆頂部、對話後隱藏 chips；「獎勵有哪些」直接完整回答；新增 photo_need_new_product、raffle_fairness、visit_partner_stores |
@@ -147,7 +160,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 ## 打包交付
 
-桌面交付壓縮檔：`大韓菸草客服20260729-還原點.zip`（V.0732 完整還原點，含 kmba-chatbot 與架構 Word）
+桌面交付壓縮檔：`大韓菸草客服20260729-還原點.zip`（V.0732 完整還原點；線上最新為 V.0734）
 
 ---
 
@@ -167,7 +180,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | F | FAQ 類別 | topic（如 `raffleTicket`） |
 | G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
 | H | 裝置 | 如 `iPhone / Safari` |
-| I | 版本 | 如 `V.0732` |
+| I | 版本 | 如 `V.0734` |
 | J | 備註 | 含 `messageId=KMBA-MSG-...` |
 
 ### Web App URL（前端使用 `/exec`）
@@ -204,7 +217,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 
 - 寫入或更新失敗**不影響**客服回答
 - 一般使用者畫面**不顯示**任何錯誤
-- 開發測試可在瀏覽器 console 查看 `[KMBA Log]` warning
+- 開發測試可在瀏覽器 console 查看 `[KMBA Log]`，或使用 `?debug=1` 開啟畫面 debug 面板
 
 ### 不記錄的項目
 
@@ -214,14 +227,14 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 
 ---
 
-## V.0732 FAQ 知識庫摘要（38 項）
+## V.0734 FAQ 知識庫摘要（38 項）
 
 | faqId | 類別 | 說明 |
 |-------|------|------|
 | tasks_guide | tasks | 任務類型解說 |
 | rewards_guide | giftCard | 獎勵有哪些（直接完整回答） |
 | gift_card_earn | giftCard | 商品卡怎麼拿 |
-| gift_card_delivery | giftCard | 商品卡發放／領取方式 |
+| gift_card_delivery | giftCard | 商品卡發放（區域業務親送／直送店家） |
 | gift_card_rank_after_15 | giftCard | 15 名以後商品卡面額 |
 | gift_card_tiers | giftCard | 商品卡級距差別 |
 | ranking_calc | giftCard | 每月排名計算 |
@@ -246,4 +259,4 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 | quiz_task | tasks | 品牌隨堂考 |
 | monthly_tasks | tasks | 每月有哪些任務 |
 
-詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0732.docx`
+詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0732.docx`（架構文件；線上程式版本 V.0734）
