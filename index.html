@@ -421,6 +421,49 @@
       .header h1 { font-size: 18px; }
       .header p { font-size: 12px; }
     }
+    .debug-panel {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 38vh;
+      background: rgba(18, 26, 48, 0.96);
+      color: #e8eef8;
+      font-size: 11px;
+      font-family: ui-monospace, Consolas, monospace;
+      z-index: 9999;
+      border-top: 2px solid #ffb020;
+      flex-direction: column;
+    }
+    .debug-panel.show { display: flex; }
+    .debug-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: rgba(255, 176, 32, 0.15);
+      font-weight: 700;
+      color: #ffb020;
+      flex-shrink: 0;
+    }
+    .debug-panel-head button {
+      border: 1px solid #ffb020;
+      background: transparent;
+      color: #ffb020;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .debug-panel-body {
+      overflow: auto;
+      padding: 8px 10px 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    body.debug-mode .app { padding-bottom: 0; }
   </style>
 </head>
 <body>
@@ -433,7 +476,7 @@
           <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中文｜版本 V.0733</span>
+      <span class="badge">繁體中文｜版本 V.0734</span>
     </header>
 
     <div class="messages" id="messages">
@@ -480,6 +523,14 @@
     </div>
   </div>
 
+  <div class="debug-panel" id="debugPanel" aria-hidden="true">
+    <div class="debug-panel-head">
+      <span>KMBA Debug（?debug=1）</span>
+      <button type="button" id="debugClear">清除</button>
+    </div>
+    <div class="debug-panel-body" id="debugBody"></div>
+  </div>
+
   <script src="kb-engine.js"></script>
   <script>
     const messagesEl = document.getElementById('messages');
@@ -489,8 +540,45 @@
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
     const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0ObrlhmxTo_LN_bEnWVUSvwa1ND0GQ/exec';
-    const KMBA_APP_VERSION = 'V.0733';
+    const KMBA_APP_VERSION = 'V.0734';
     const KMBA_SESSION_KEY = 'kmbaSessionId';
+    const KMBA_DEBUG = (function () {
+      try {
+        return new URLSearchParams(location.search).get('debug') === '1';
+      } catch (e) {
+        return false;
+      }
+    })();
+    const debugPanel = document.getElementById('debugPanel');
+    const debugBody = document.getElementById('debugBody');
+
+    function debugLog(title, detail) {
+      const line = '[' + new Date().toLocaleTimeString('zh-TW', { hour12: false }) + '] ' + title
+        + (detail !== undefined ? '\n' + (typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2)) : '');
+      console.log('[KMBA Debug]', title, detail);
+      if (!KMBA_DEBUG || !debugBody) return;
+      debugBody.textContent = (debugBody.textContent ? debugBody.textContent + '\n\n' : '') + line;
+      debugBody.scrollTop = debugBody.scrollHeight;
+    }
+
+    if (KMBA_DEBUG) {
+      document.body.classList.add('debug-mode');
+      if (debugPanel) {
+        debugPanel.classList.add('show');
+        debugPanel.setAttribute('aria-hidden', 'false');
+      }
+      debugLog('Debug 模式已啟用', {
+        version: KMBA_APP_VERSION,
+        endpoint: KMBA_LOG_ENDPOINT,
+        note: 'no-cors 無法讀取 GAS 回應，請至 Sheet 確認是否寫入',
+      });
+      const debugClear = document.getElementById('debugClear');
+      if (debugClear) {
+        debugClear.addEventListener('click', function () {
+          if (debugBody) debugBody.textContent = '';
+        });
+      }
+    }
 
     function getOrCreateSessionId() {
       let id = sessionStorage.getItem(KMBA_SESSION_KEY);
@@ -557,6 +645,15 @@
       const url = buildLogUrl(payload);
       console.log(payload.action === 'update' ? '[Update]' : '[Create]', payload);
       console.log('[KMBA Log URL]', url);
+      debugLog(payload.action === 'update' ? 'Sheet Update' : 'Sheet Create', {
+        url: url,
+        sessionId: payload.sessionId,
+        messageId: payload.messageId,
+        faqId: payload.faqId,
+        category: payload.category,
+        question: payload.question,
+        resolved: payload.resolved,
+      });
       try {
         await fetch(url, {
           method: 'POST',
@@ -564,8 +661,10 @@
           body: JSON.stringify(payload),
           keepalive: true,
         });
+        debugLog('Fetch 已送出', 'no-cors 模式下瀏覽器不會回傳成功/失敗，請至 Google Sheet 確認');
       } catch (error) {
         console.warn('[KMBA Log] 傳送失敗：', error);
+        debugLog('Fetch 失敗', String(error));
       }
     }
 
@@ -805,6 +904,13 @@
       setTimeout(function () {
         if (typeof KB !== 'undefined' && KB.answer) {
           const data = KB.answer(q);
+          debugLog('FAQ 回答', {
+            question: q,
+            faqId: data.faqId,
+            category: data.category,
+            intent: data.intent,
+            conclusion: getAnswerSummary(data),
+          });
           addBotMsg(data, { messageId: messageId, question: q });
           if (shouldLogChat(data)) {
             const payload = {

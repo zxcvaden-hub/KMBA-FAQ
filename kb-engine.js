@@ -1,4 +1,4 @@
-/* KMBA CLUB 2026 V0732 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V0734 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
@@ -108,7 +108,8 @@
     礼券: '禮券', 开奖: '開獎', 中奖: '中獎', 双月: '雙月',
   };
 
-  const STOPWORDS = /請問|請教|想问|想問|可以|能不能|可否|帮我|幫我|告诉我|告訴我|想知道|怎么|怎麼|如何|什么|什麼|甚么|哪些|哪一些|一下|吗|嗎|呢|啊|呀|喔|哦|吧|的|了|在|有|是|吗|嘛|么|嗎/g;
+  // 比對問題時剝除的語助詞（不刪「有」「哪些」，避免「獎勵有哪些」被削成「獎勵」而誤判）
+  const STOPWORDS = /請問|請教|想问|想問|可以|能不能|可否|帮我|幫我|告诉我|告訴我|想知道|怎么|怎麼|如何|什么|什麼|甚么|一下|吗|嗎|呢|啊|呀|喔|哦|吧|的|了|在|是|嘛|么/g;
 
   function canShowDecemberReward(now) {
     const revealAt = new Date(CAMPAIGN_DATES.decemberRevealAt);
@@ -428,10 +429,11 @@
       },
       get() {
         return formatAnswer({
-          conclusion: '商品卡依每月積分排行結果發放，請留意活動通知；領取方式請洽詢區域業務。',
+          conclusion: '商品卡依每月積分排行結果發放，由區域業務親送或直接發放給店家。',
           details: [
             '需當月完成至少 1 項任務才有排行資格。',
             '我們發放的是統一超商商品卡，不是禮券或現金。',
+            '實際發放時間與方式請留意活動通知，或洽詢您的區域業務。',
           ],
           nextStep: step('giftCard'),
           suggestions: RELATED_QUESTIONS.giftCard.slice(0, 2),
@@ -618,8 +620,8 @@
     {
       id: 'raffle_reset',
       topic: 'raffleTicket',
-      keywords: ['抽獎券什麼時候歸零', '抽獎券歸零', '重新計算', '重新计算', '抽完'],
-      match(n) { return /歸零|重新計|重新计|抽完.*券|券.*抽完/.test(n); },
+      keywords: ['抽獎券什麼時候歸零', '抽獎券歸零', '重新計算', '重新计算', '抽完', '多久重新計算', '多久會重新計算'],
+      match(n) { return /歸零|重新計|重新计|抽完.*券|券.*抽完|多久.*重新/.test(n); },
       get() {
         return formatAnswer({
           conclusion: '每次抽完後，抽獎券會重新計算。',
@@ -1028,7 +1030,7 @@
     },
     抽獎: {
       prompt: '請問你想了解哪一部分？',
-      options: ['雙月抽獎獎項有哪些？', '100分有幾張抽獎券？', '抽獎券多久重新計算？', '請完整說明抽獎規則'],
+      options: ['雙月抽獎獎項有哪些？', '100分有幾張抽獎券？', '抽獎券多久會重新計算？', '請完整說明抽獎規則'],
       topic: 'raffleSelect',
     },
     獎品: {

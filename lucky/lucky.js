@@ -4,7 +4,7 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // V0724 bimonthly draw prizes — 統一超商商品卡（all winners receive the same amount).
+  // V0734 bimonthly draw prizes — 統一超商商品卡（all winners receive the same amount).
   const DEC_DRAW_REVEAL_DATE = new Date('2026-10-01T00:00:00+08:00');
   const DRAW_PERIODS = {
     oct: {
