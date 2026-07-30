@@ -1,7 +1,7 @@
 # KMBA CLUB 2026 — 活動小助手
 
 KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜態網站）。  
-**目前版本：V.0731**
+**目前版本：V.0732**
 
 **線上版本：** [https://zxcvaden-hub.github.io/KMBA-FAQ/](https://zxcvaden-hub.github.io/KMBA-FAQ/)
 
@@ -93,7 +93,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | 檔案／目錄 | 用途 |
 |------------|------|
 | `index.html` | 活動小助手聊天介面（手機優先） |
-| `kb-engine.js` | 問答引擎（V.0731） |
+| `kb-engine.js` | 問答引擎（V.0732） |
 | `kmba-logo.png` | LOGO 大頭貼 |
 | `lucky/index.html` | 雙月抽獎工具頁（操作端／觀看端，非公開入口） |
 | `lucky/lucky.js` | 抽獎邏輯（加權不放回、彩券種子、可驗證） |
@@ -134,6 +134,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
+| **V.0732** | 2026/07/29 | 抽獎公平 FAQ 文案優化（客戶確認版）；清理本地殘留備份與舊開發檔 |
 | **V.0731** | 2026/07/29 | 抽獎公平 FAQ：台灣彩券種子、固定公式、10/12 月場全程螢幕錄影並公布 |
 | V.0730 | 2026/07/29 | 依客服紀錄分析修補 FAQ：照片新品、15名以後、客人推薦定義、商品卡發放、拜訪店家通知、精準關鍵字匹配 |
 | V.0729 | 2026/07/29 | UX：滾至回覆頂部、對話後隱藏 chips；「獎勵有哪些」直接完整回答；新增 photo_need_new_product、raffle_fairness、visit_partner_stores |
@@ -146,7 +147,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 ## 打包交付
 
-桌面交付壓縮檔：`大韓菸草客服20260729.zip`（含完整 kmba-chatbot 與架構 Word 文件）
+桌面交付壓縮檔：`大韓菸草客服20260729-還原點.zip`（V.0732 完整還原點，含 kmba-chatbot 與架構 Word）
 
 ---
 
@@ -166,7 +167,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | F | FAQ 類別 | topic（如 `raffleTicket`） |
 | G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
 | H | 裝置 | 如 `iPhone / Safari` |
-| I | 版本 | 如 `V.0731` |
+| I | 版本 | 如 `V.0732` |
 | J | 備註 | 含 `messageId=KMBA-MSG-...` |
 
 ### Web App URL（前端使用 `/exec`）
@@ -213,7 +214,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 
 ---
 
-## V.0731 FAQ 知識庫摘要（38 項）
+## V.0732 FAQ 知識庫摘要（38 項）
 
 | faqId | 類別 | 說明 |
 |-------|------|------|
@@ -245,4 +246,4 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 | quiz_task | tasks | 品牌隨堂考 |
 | monthly_tasks | tasks | 每月有哪些任務 |
 
-詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0731.docx`
+詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0732.docx`
