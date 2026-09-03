@@ -244,6 +244,17 @@
       background: var(--mint);
       border-color: var(--blue);
     }
+    .answer-feedback-actions--reasons {
+      grid-template-columns: 1fr;
+    }
+    .answer-feedback-actions button[data-feedback="helpful"] {
+      border-color: #2E9E6A;
+      color: #1B6B47;
+    }
+    .answer-feedback-actions button[data-feedback="not-helpful"] {
+      border-color: #D96B6B;
+      color: #9E3A3A;
+    }
     .answer-feedback-actions button:disabled {
       opacity: 0.55;
       cursor: default;
@@ -255,6 +266,22 @@
       .answer-feedback-actions {
         grid-template-columns: 1fr;
       }
+    }
+    .msg-images {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg-images img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid #E6EBF2;
+      background: #fff;
+      display: block;
+      cursor: pointer;
     }
     .msg.bot {
       background: var(--card);
@@ -476,7 +503,7 @@
           <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中文｜版本 V.0734</span>
+      <span class="badge">繁體中文｜版本 V.09</span>
     </header>
 
     <div class="messages" id="messages">
@@ -487,9 +514,9 @@
 
 你可以直接提問，或點下方快捷按鈕：
 
-「雙月抽獎獎項有哪些？」
-「獎勵有哪些」
-「100分有幾張抽獎券？」
+「我的積分怎麼算？」
+「商品卡怎麼拿？」
+「抽獎券怎麼拿？」
 
 若問題較模糊，我會再詢問你想了解的項目。</div>
         <div id="welcomeShortcuts"></div>
@@ -502,17 +529,17 @@
     <div class="bottom-panel" id="bottomPanel">
       <div class="chips-label">快捷提問</div>
       <div class="chips" id="chips">
-        <button type="button" class="chip" data-q="雙月抽獎獎項有哪些？">
-          🎰 雙月抽獎獎項
-          <span class="chip-sub">10月 15位×1,000元商品卡 · 12月場 10/1 起公告</span>
+        <button type="button" class="chip" data-q="我的積分怎麼算？">
+          📊 我的積分怎麼算？
+          <span class="chip-sub">各任務 100 分 · 月上限 300 分</span>
         </button>
-        <button type="button" class="chip" data-q="獎勵有哪些">
-          🎁 獎勵有哪些
-          <span class="chip-sub">商品卡 100～500 元 · 抽獎券 · 雙月抽獎</span>
+        <button type="button" class="chip" data-q="商品卡怎麼拿？">
+          🎁 商品卡怎麼拿？
+          <span class="chip-sub">依每月總積分排行 · 100～500 元</span>
         </button>
-        <button type="button" class="chip" data-q="任務類型解說">
-          📋 任務類型解說
-          <span class="chip-sub">常態任務 · 拜訪任務 · 積分規則</span>
+        <button type="button" class="chip" data-q="抽獎券怎麼拿？">
+          🎟️ 抽獎券怎麼拿？
+          <span class="chip-sub">100／200／300 分 · 雙月抽獎</span>
         </button>
       </div>
       <form class="input-area" id="form">
@@ -540,8 +567,22 @@
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
     const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0ObrlhmxTo_LN_bEnWVUSvwa1ND0GQ/exec';
-    const KMBA_APP_VERSION = 'V.0734';
+    const KMBA_APP_VERSION = 'V.09';
     const KMBA_SESSION_KEY = 'kmbaSessionId';
+    const KMBA_TRAFFIC_TYPE = (function () {
+      try {
+        const params = new URLSearchParams(location.search);
+        if (params.get('test') === '1' || params.get('debug') === '1') return 'TEST';
+      } catch (e) { /* ignore */ }
+      return 'USER';
+    })();
+    const FEEDBACK_REASONS = [
+      { id: 'incomplete', label: '答案不完整' },
+      { id: 'rule_mismatch', label: '規則跟我知道的不一樣' },
+      { id: 'unclear', label: '看不懂' },
+      { id: 'not_found', label: '找不到我要問的內容' },
+      { id: 'other', label: '其他' },
+    ];
     const KMBA_DEBUG = (function () {
       try {
         return new URLSearchParams(location.search).get('debug') === '1';
@@ -625,8 +666,16 @@
       return !!(data && data.intent !== 'feedback');
     }
 
-    function buildLogNote(messageId, data) {
-      return 'sessionId=' + KMBA_SESSION_ID + ';messageId=' + messageId + ';intent=' + ((data && data.intent) || '');
+    function buildLogNote(messageId, data, extra) {
+      extra = extra || {};
+      const parts = [
+        'sessionId=' + KMBA_SESSION_ID,
+        'messageId=' + messageId,
+        'intent=' + ((data && data.intent) || ''),
+        'traffic_type=' + KMBA_TRAFFIC_TYPE,
+      ];
+      if (extra.feedbackReason) parts.push('feedbackReason=' + extra.feedbackReason);
+      return parts.join(';');
     }
 
     function buildLogUrl(payload) {
@@ -672,20 +721,45 @@
       await postChatLog(payload);
     }
 
-    async function updateChatLog(messageId, resolved) {
+    async function updateChatLog(messageId, resolved, feedbackReason) {
       if (!messageId) {
         console.warn('[KMBA Log] 更新略過：缺少 messageId');
         return;
       }
+      const noteParts = [
+        'sessionId=' + KMBA_SESSION_ID,
+        'messageId=' + messageId,
+        'traffic_type=' + KMBA_TRAFFIC_TYPE,
+      ];
+      if (feedbackReason) noteParts.push('feedbackReason=' + feedbackReason);
       const payload = {
         action: 'update',
         messageId: messageId,
         resolved: resolved,
         timestamp: new Date().toISOString(),
         sessionId: KMBA_SESSION_ID,
-        note: 'sessionId=' + KMBA_SESSION_ID + ';messageId=' + messageId,
+        note: noteParts.join(';'),
+        feedbackReason: feedbackReason || '',
       };
       await postChatLog(payload);
+    }
+
+    function renderFeedbackReasons(wrap, messageId) {
+      const reasonWrap = document.createElement('div');
+      reasonWrap.className = 'answer-feedback-actions answer-feedback-actions--reasons';
+      reasonWrap.dataset.stage = 'reasons';
+      const reasonTitle = document.createElement('p');
+      reasonTitle.className = 'answer-feedback-title';
+      reasonTitle.textContent = '主要原因是？';
+      wrap.appendChild(reasonTitle);
+      FEEDBACK_REASONS.forEach(function (item) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.feedbackReason = item.id;
+        btn.textContent = item.label;
+        reasonWrap.appendChild(btn);
+      });
+      wrap.appendChild(reasonWrap);
     }
 
     function renderAnswerFeedback(box, messageId) {
@@ -694,13 +768,14 @@
       wrap.dataset.messageId = messageId;
       const title = document.createElement('p');
       title.className = 'answer-feedback-title';
-      title.textContent = '以上有回答到你的問題嗎？';
+      title.textContent = '這個回答有解決你的問題嗎？';
       wrap.appendChild(title);
       const actions = document.createElement('div');
       actions.className = 'answer-feedback-actions';
+      actions.dataset.stage = 'main';
       [
-        { type: 'resolved', label: '有，已了解' },
-        { type: 'more', label: '還有其他問題' },
+        { type: 'helpful', label: '👍 有解決' },
+        { type: 'not-helpful', label: '👎 沒解決' },
       ].forEach(function (item) {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -797,6 +872,22 @@
         const plain = document.createElement('div');
         plain.textContent = data.reply;
         box.appendChild(plain);
+      }
+
+      if (data && data.images && data.images.length) {
+        const gallery = document.createElement('div');
+        gallery.className = 'msg-images';
+        data.images.forEach(function (item) {
+          const img = document.createElement('img');
+          img.src = item.src || item;
+          img.alt = item.alt || '新品知識圖';
+          img.loading = 'lazy';
+          img.addEventListener('click', function () {
+            window.open(img.src, '_blank', 'noopener');
+          });
+          gallery.appendChild(img);
+        });
+        box.appendChild(gallery);
       }
 
       if (data && data.reminder) {
@@ -949,28 +1040,52 @@
     }
 
     messagesEl.addEventListener('click', function (event) {
-      const button = event.target.closest('[data-feedback]');
+      const button = event.target.closest('button');
       if (!button || button.disabled) return;
       const feedbackBox = button.closest('.answer-feedback');
       if (!feedbackBox || feedbackBox.dataset.submitted === '1') return;
-      feedbackBox.dataset.submitted = '1';
-      feedbackBox.querySelectorAll('button').forEach(function (item) {
-        item.disabled = true;
-      });
+
+      if (button.dataset.feedbackReason) {
+        feedbackBox.dataset.submitted = '1';
+        feedbackBox.querySelectorAll('button').forEach(function (item) { item.disabled = true; });
+        const messageId = feedbackBox.dataset.messageId;
+        const reason = button.dataset.feedbackReason;
+        updateChatLog(messageId, 'NO', reason);
+        setLoading(true);
+        setTimeout(function () {
+          if (typeof KB !== 'undefined' && KB.handleFeedback) {
+            addBotMsg(KB.handleFeedback('more'));
+          }
+          setLoading(false);
+        }, 200);
+        return;
+      }
+
+      if (!button.dataset.feedback) return;
+
       const type = button.dataset.feedback;
       const messageId = feedbackBox.dataset.messageId;
-      if (type === 'resolved') {
+      const mainActions = feedbackBox.querySelector('[data-stage="main"]');
+
+      if (type === 'helpful') {
+        feedbackBox.dataset.submitted = '1';
+        feedbackBox.querySelectorAll('button').forEach(function (item) { item.disabled = true; });
         updateChatLog(messageId, 'YES');
-      } else if (type === 'more') {
-        updateChatLog(messageId, 'NO');
+        setLoading(true);
+        setTimeout(function () {
+          if (typeof KB !== 'undefined' && KB.handleFeedback) {
+            addBotMsg(KB.handleFeedback('resolved'));
+          }
+          setLoading(false);
+        }, 200);
+        return;
       }
-      setLoading(true);
-      setTimeout(function () {
-        if (typeof KB !== 'undefined' && KB.handleFeedback) {
-          addBotMsg(KB.handleFeedback(type));
-        }
-        setLoading(false);
-      }, 200);
+
+      if (type === 'not-helpful') {
+        if (mainActions) mainActions.querySelectorAll('button').forEach(function (item) { item.disabled = true; });
+        renderFeedbackReasons(feedbackBox, messageId);
+        scrollToBottom();
+      }
     });
 
     form.addEventListener('submit', function (e) {
@@ -996,7 +1111,7 @@
       label.textContent = '熱門問題';
       host.appendChild(label);
       host.appendChild(buildButtonList(
-        ['雙月抽獎獎項有哪些？', '獎勵有哪些', '100分有幾張抽獎券？', '任務類型解說'],
+        ['我的積分怎麼算？', '商品卡怎麼拿？', '抽獎券怎麼拿？', '9月新品是什麼？', '雙月抽獎怎麼玩？'],
         'suggestion-list--options',
         sendMessage
       ));

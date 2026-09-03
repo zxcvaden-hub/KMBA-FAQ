@@ -4,6 +4,10 @@
  *
  * Spreadsheet: KMBA客服紀錄
  * ID: 1vnxyG4AFXVnfeWkIHVcBctTWWprjMXXmJEFEhEzgcN4
+ *
+ * 欄位（A–J）：
+ * A 時間 | B Session ID | C 使用者問題 | D AI回答摘要
+ * E 命中FAQ | F FAQ類別 | G 是否已解決 | H 裝置 | I 版本 | J 備註
  */
 
 const SPREADSHEET_ID = '1vnxyG4AFXVnfeWkIHVcBctTWWprjMXXmJEFEhEzgcN4';
@@ -12,11 +16,16 @@ const NOTE_COL = 10; // J
 const SESSION_COL = 2; // B
 const RESOLVED_COL = 7; // G
 
+const SHEET_HEADERS = [
+  '時間', 'Session ID', '使用者問題', 'AI回答摘要', '命中FAQ',
+  'FAQ類別', '是否已解決', '裝置', '版本', '備註',
+];
+
 function doGet() {
   return jsonOutput({
     success: true,
     service: 'KMBA客服紀錄',
-    version: 'V.0728',
+    version: 'V.09',
   });
 }
 
@@ -79,7 +88,21 @@ function getTargetSheet() {
   if (!sheet) {
     throw new Error('Target sheet not found');
   }
+  ensureHeaders(sheet);
   return sheet;
+}
+
+function ensureHeaders(sheet) {
+  const firstRow = sheet.getRange(1, 1, 1, SHEET_HEADERS.length).getValues()[0];
+  const empty = firstRow.every(function (cell) { return String(cell || '').trim() === ''; });
+  const mismatch = SHEET_HEADERS.some(function (header, idx) {
+    return String(firstRow[idx] || '').trim() !== header;
+  });
+  if (empty) {
+    sheet.getRange(1, 1, 1, SHEET_HEADERS.length).setValues([SHEET_HEADERS]);
+  } else if (mismatch && sheet.getLastRow() <= 1) {
+    sheet.getRange(1, 1, 1, SHEET_HEADERS.length).setValues([SHEET_HEADERS]);
+  }
 }
 
 function extractMessageId(noteText, explicitId) {
@@ -181,6 +204,17 @@ function updateLog(sheet, data) {
   }
 
   sheet.getRange(row, RESOLVED_COL).setValue(resolved);
+
+  if (data.note || data.feedbackReason) {
+    const existingNote = String(sheet.getRange(row, NOTE_COL).getValue() || '');
+    let note = String(data.note || existingNote).trim();
+    if (data.feedbackReason && note.indexOf('feedbackReason=') === -1) {
+      note = (note ? note + ';' : '') + 'feedbackReason=' + data.feedbackReason;
+    }
+    if (note) {
+      sheet.getRange(row, NOTE_COL).setValue(note);
+    }
+  }
 
   return jsonOutput({
     success: true,

@@ -1,7 +1,7 @@
 # KMBA CLUB 2026 — 活動小助手
 
 KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜態網站）。  
-**目前版本：V.0734**
+**目前版本：V.09**
 
 **線上版本：** [https://zxcvaden-hub.github.io/KMBA-FAQ/](https://zxcvaden-hub.github.io/KMBA-FAQ/)
 
@@ -19,28 +19,29 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 
 ## V0724 核心規格摘要
 
-### 常態任務（每月上限 300 分）
-
-- 任務**不定時**透過 LINE 官方帳號發布，**提交越早越好**
-- 各任務完成可獲 **100 分**
+### 常態任務（對外活動積分）
 
 | 任務 | 積分 |
 |------|------|
-| 品牌隨堂考 | 100 |
-| 客人推薦照片 | 100 |
-| 新品陳列照片 | 100 |
+| 品牌隨堂考 | 完成 **100 分** |
+| 新品陳列任務 | 審核通過 **100 分** |
+| 客人推薦任務 | 審核通過 **100 分** |
 
-**積分兌換抽獎券（每月累積）：**
+**常態任務每月積分上限：300 分**
+
+**抽獎券（依當月活動積分）：**
 
 - 100 分 → 1 張
 - 200 分 → 2 張
-- 300 分以上 → 3 張
+- 300 分 → 3 張
+
+> 總公司內部排行榜算法（時間加成、第一次作答等）不對合作通路商公開，僅供後台計算。
 
 ### 商品卡（統一超商商品卡，非禮券、非現金）
 
 - 依每月積分排行發放，需當月完成至少 1 項任務
 - **發放方式：** 由區域業務親送或直接發放給店家
-- 排名依積分多寡與提交時間排序
+- 排名依當月任務積分；同分依活動相關規則認定
 - 第 1～20 名：500 元商品卡
 - 第 21～40 名：200 元商品卡
 - 第 41～100 名：100 元商品卡
@@ -94,7 +95,8 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | 檔案／目錄 | 用途 |
 |------------|------|
 | `index.html` | 活動小助手聊天介面（手機優先） |
-| `kb-engine.js` | 問答引擎（V.0734） |
+| `kb-engine.js` | 問答引擎（V.09） |
+| `assets/` | 9 月新品知識圖等靜態資源 |
 | `kmba-logo.png` | LOGO 大頭貼 |
 | `lucky/index.html` | 雙月抽獎工具頁（操作端／觀看端，非公開入口） |
 | `lucky/lucky.js` | 抽獎邏輯（加權不放回、彩券種子、可驗證） |
@@ -137,6 +139,7 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 - `index.html`
 - `kb-engine.js`
 - `kmba-logo.png`
+- `assets/`（9 月新品知識圖）
 - `lucky/` 資料夾（含 `index.html`、`lucky.js`、`banner.png`）
 
 ---
@@ -145,7 +148,8 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
-| **V.0734** | 2026/07/30 | 修正問題比對停用詞；商品卡發放文案（區域業務親送／直送店家）；`?debug=1` 除錯面板；lucky 頁更新錄影說明 |
+| **V.09** | 2026/09/03 | **9 月活動更新**：德尼露・藍寶堅尼 8 號新品 FAQ + 知識圖（`assets/`）；**對外積分規則**恢復 100×3、月上限 300、抽獎券 100/200/300；**內部排行榜算法**（時間加成等）不公開；首頁快捷重排；👍/👎 回饋 + 原因寫入 Sheet 備註；`traffic_type=USER/TEST`（`?test=1`）；情境式延伸問題 |
+| **V.0734** | 2026/07/30 | 修正問題比對停用詞；商品卡發放文案；`?debug=1` 除錯面板；lucky 頁更新錄影說明 |
 | **V.0733** | 2026/07/30 | 修正 LINE 手機快捷按鈕無反應（pointerdown、按鈕常駐顯示） |
 | **V.0732** | 2026/07/29 | 抽獎公平 FAQ 文案優化（客戶確認版）；清理本地殘留備份 |
 | **V.0731** | 2026/07/29 | 抽獎公平 FAQ：台灣彩券種子、固定公式、10/12 月場全程螢幕錄影並公布 |
@@ -160,7 +164,7 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 
 ## 打包交付
 
-桌面交付壓縮檔：`大韓菸草客服20260729-還原點.zip`（V.0732 完整還原點；線上最新為 V.0734）
+桌面交付壓縮檔：`大韓菸草客服20260730-還原點.zip`（V.0734 完整還原點）
 
 ---
 
@@ -180,7 +184,7 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 | F | FAQ 類別 | topic（如 `raffleTicket`） |
 | G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
 | H | 裝置 | 如 `iPhone / Safari` |
-| I | 版本 | 如 `V.0734` |
+| I | 版本 | 如 `V.09` |
 | J | 備註 | 含 `messageId=KMBA-MSG-...` |
 
 ### Web App URL（前端使用 `/exec`）
@@ -202,8 +206,8 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 - 每次使用者提問產生唯一 `messageId`（格式 `KMBA-MSG-...`）
 - 寫入 J 欄備註：`messageId=KMBA-MSG-...;intent=matched`
 - **一個問題只新增一列**
-- 點「有，已了解」→ 更新同一列 G 欄為 `YES`
-- 點「還有其他問題」→ 更新同一列 G 欄為 `NO`（不新增第二筆）
+- 點「👍 有解決」→ 更新同一列 G 欄為 `YES`
+- 點「👎 沒解決」→ 選原因後更新 G 欄為 `NO`，並在 J 欄寫入 `feedbackReason=...`（V.09）
 - 回饋後顯示的分類選項**不會**再寫入新紀錄
 
 ### Google Apps Script
@@ -218,6 +222,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 - 寫入或更新失敗**不影響**客服回答
 - 一般使用者畫面**不顯示**任何錯誤
 - 開發測試可在瀏覽器 console 查看 `[KMBA Log]`，或使用 `?debug=1` 開啟畫面 debug 面板
+- J 欄備註可含 `traffic_type=USER|TEST`、`feedbackReason=...`（V.09 起）
 
 ### 不記錄的項目
 
@@ -227,36 +232,14 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 
 ---
 
-## V.0734 FAQ 知識庫摘要（38 項）
+## V.09 FAQ 知識庫摘要（新增／重點）
 
 | faqId | 類別 | 說明 |
 |-------|------|------|
-| tasks_guide | tasks | 任務類型解說 |
-| rewards_guide | giftCard | 獎勵有哪些（直接完整回答） |
-| gift_card_earn | giftCard | 商品卡怎麼拿 |
-| gift_card_delivery | giftCard | 商品卡發放（區域業務親送／直送店家） |
-| gift_card_rank_after_15 | giftCard | 15 名以後商品卡面額 |
-| gift_card_tiers | giftCard | 商品卡級距差別 |
-| ranking_calc | giftCard | 每月排名計算 |
-| ranking_tie | giftCard | 積分相同排名 |
-| raffle_prizes | raffleTicket | 雙月抽獎獎項 |
-| raffle_fairness | raffleTicket | 抽獎公平／機制／螢幕錄影 |
-| raffle_100 / 200 / 300 | raffleTicket | 積分兌換抽獎券 |
-| raffle_rules_full | raffleTicket | 完整抽獎規則 |
-| raffle_reset | raffleTicket | 抽獎券重新計算 |
-| visit_has_ticket | raffleTicket | 拜訪也有抽獎券 |
-| visit_task | visitTask | 拜訪任務說明 |
-| visit_partner_stores | visitTask | 合作店家／會通知嗎 |
-| visit_points | visitTask | 拜訪有積分嗎 |
-| visit_one_ticket | visitTask | 拜訪一間幾張券 |
-| visit_max | visitTask | 每月最多拜訪幾間 |
-| visit_photo_what | visitTask | 拜訪照片要拍什麼 |
-| passport_alias | visitTask | Passport 用語導向 |
-| customer_photo* | customerPhoto | 客人推薦照片規則 |
-| photo_need_new_product | customerPhoto | 照片一定要有新品 |
-| customer_photo_definition | customerPhoto | 客人推薦照片定義 |
-| display_photo* | displayPhoto | 新品陳列照片規則 |
-| quiz_task | tasks | 品牌隨堂考 |
-| monthly_tasks | tasks | 每月有哪些任務 |
+| points_calc | points | 我的積分怎麼算（對外 100×3） |
+| sept_product_info | tasks | 9 月新品 + 知識圖 |
+| raffle_tickets_how | raffleTicket | 抽獎券怎麼拿 |
+| display_task_points | displayPhoto | 陳列任務幾分 |
+| internal_ranking_redirect | giftCard | 攔截內部算法詢問，回簡化排行說明 |
 
-詳細架構請見同資料夾上層：`KMBA-CLUB-2026-資料庫與知識庫架構-V0732.docx`（架構文件；線上程式版本 V.0734）
+其餘 FAQ 見 V.0734 清單；完整架構文件待更新。

@@ -1,9 +1,64 @@
-/* KMBA CLUB 2026 V0734 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V.09 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
+  const APP_VERSION = 'V.09';
+
   const CAMPAIGN_DATES = {
     decemberRevealAt: '2026-10-01T00:00:00+08:00',
+  };
+
+  /** 當月活動設定（9 月）— 唯一來源 */
+  const CAMPAIGN_CONFIG = {
+    monthLabel: '9月',
+    monthProduct: '德尼露・藍寶堅尼 8號',
+    monthProductBrand: 'Tonino Lamborghini',
+    productTagline: '義式超跑精神 × 頂級菸草工藝',
+    productSpecs: {
+      price: 'NT$ 130',
+      tar: '8mg',
+      nicotine: '0.8mg',
+      filter: '不沾唇濾嘴',
+    },
+    productFeatures: [
+      '不沾唇濾嘴 — 乾淨品味・舒適體驗',
+      '飽滿滑順口感 — 扎實擊喉感，入口滑順純淨，毫無辛辣刺激',
+      '義式超跑美學 — 來自藍寶堅尼家族，品味生活的極致象徵',
+      '嚴選頂級菸草 — 精選調配工藝，香氣飽滿純淨',
+    ],
+    productImages: [
+      { src: 'assets/sept-product-features.png', alt: '9月新品特色介紹 — 德尼露・藍寶堅尼 8號' },
+      { src: 'assets/sept-product-specs.png', alt: '9月新品規格 — 建議零售價 NT$130' },
+    ],
+  };
+
+  /**
+   * 對外活動積分（activityPoints / publicPoints）
+   * K小助 FAQ、快捷問題、首頁說明 — 唯一使用的積分規則
+   */
+  const ACTIVITY_POINTS = {
+    quizComplete: 100,
+    displayApproved: 100,
+    customerApproved: 100,
+    monthlyCap: 300,
+    raffleThresholds: [
+      { points: 300, tickets: 3 },
+      { points: 200, tickets: 2 },
+      { points: 100, tickets: 1 },
+    ],
+  };
+
+  /**
+   * 總公司內部排行榜算法（internalRankingScore）
+   * 僅供後台／Excel 計算參考 — 禁止出現在一般 FAQ
+   */
+  const INTERNAL_RANKING = {
+    useFirstQuizAttemptOnly: true,
+    sortByRawScoreThenFirstAttemptTime: true,
+    timeBonusStart: 1.0,
+    timeBonusStep: 0.01,
+    displayPoints: 100,
+    customerPoints: 100,
   };
 
   const CHAT_CONTEXT_KEY = 'kmbaChatContext';
@@ -18,15 +73,14 @@
 
   const RELATED_QUESTIONS = {
     giftCard: [
+      '我的積分怎麼算？',
       '每月積分排行商品卡差別',
-      '每月排名怎麼計算？',
       '積分相同怎麼排名？',
     ],
     raffleTicket: [
-      '雙月抽獎獎項有哪些？',
       '200分有幾張抽獎券？',
-      '拜訪任務也有抽獎券嗎？',
-      '抽獎券多久會重新計算？',
+      '300分有幾張抽獎券？',
+      '雙月抽獎獎項有哪些？',
     ],
     customerPhoto: [
       '客人一定要露臉嗎？',
@@ -35,8 +89,8 @@
     ],
     displayPhoto: [
       '新品要拍多清楚？',
-      '照片需要出現店內環境嗎？',
-      '陳列照片有哪些注意事項？',
+      '陳列任務幾分？',
+      '客人推薦怎麼拍？',
     ],
     visitTask: [
       '每月最多可以拜訪幾間？',
@@ -44,58 +98,83 @@
       '拜訪任務有積分嗎？',
     ],
     tasks: [
-      '100分有幾張抽獎券？',
+      '抽獎券怎麼拿？',
       '商品卡怎麼拿？',
-      '拜訪任務怎麼做？',
+      '我的積分怎麼算？',
+    ],
+    points: [
+      '100分有幾張抽獎券？',
+      '每月排名怎麼計算？',
+      '商品卡怎麼拿？',
     ],
     general: [
-      '任務類型解說',
-      '獎勵有哪些',
-      '100分有幾張抽獎券？',
+      '我的積分怎麼算？',
+      '商品卡怎麼拿？',
+      '抽獎券怎麼拿？',
     ],
+  };
+
+  /** Contextual follow-up（每次最多 3 個） */
+  const CONTEXTUAL_FOLLOWUPS = {
+    points_calc: ['100分有幾張抽獎券？', '每月排名怎麼計算？', '這個月有哪些任務？'],
+    raffle_100: ['200分有幾張抽獎券？', '300分有幾張抽獎券？', '雙月抽獎獎項有哪些？'],
+    raffle_200: ['100分有幾張抽獎券？', '300分有幾張抽獎券？', '雙月抽獎獎項有哪些？'],
+    raffle_300: ['100分有幾張抽獎券？', '200分有幾張抽獎券？', '抽獎券怎麼拿？'],
+    raffle_tickets_how: ['100分有幾張抽獎券？', '200分有幾張抽獎券？', '雙月抽獎獎項有哪些？'],
+    raffle_rules_full: ['100分有幾張抽獎券？', '300分有幾張抽獎券？', '雙月抽獎獎項有哪些？'],
+    display_photo: ['照片怎樣才算合格？', '陳列任務幾分？', '客人推薦怎麼拍？'],
+    display_photo_bare: ['新品要拍多清楚？', '陳列任務幾分？', '客人推薦怎麼拍？'],
+    customer_photo: ['怎樣的照片可能不通過？', '照片裡一定要有新品嗎？', '客人一定要露臉嗎？'],
+    monthly_tasks: ['9月新品是什麼？', '新品陳列怎麼拍？', '這個月有哪些任務？'],
+    sept_product_info: ['這個月有哪些任務？', '新品陳列怎麼拍？', '客人推薦怎麼拍？'],
+    quiz_task: ['我的積分怎麼算？', '100分有幾張抽獎券？', '這個月有哪些任務？'],
+    ranking_calc: ['我的積分怎麼算？', '100分有幾張抽獎券？', '商品卡怎麼拿？'],
+    rewards_guide: ['商品卡級距', '抽獎券規則', '雙月抽獎獎項有哪些？'],
   };
 
   const PHOTO_CHECKLIST = {
     customerPhoto: {
-      confirm: [
-        '畫面中有客人',
-        '畫面中有當月新品',
-        '有 Bartender 或主理人向客人推薦新品的互動感',
-        '照片清楚、明亮，主要人物與新品可辨識',
+      required: [
+        '需能辨識正在進行本月新品推薦相關情境',
+        '當月新品（' + CAMPAIGN_CONFIG.monthProduct + '）需清楚可見',
       ],
+      allowed: [
+        'Bartender 向客人介紹新品的互動畫面',
+        '依活動規定於吸菸區呈現新品供消費者體驗',
+      ],
+      shooting: ['畫面清楚、光線明亮'],
       reject: [
-        '只有產品，沒有客人',
-        '只有人物合照，沒有推薦情境',
-        '當月新品看不清楚',
-        '照片過暗、模糊或人物被遮擋',
+        '只有模糊商品照',
+        '無法辨識推薦情境',
+        '照片過暗',
+        '與本月活動新品無關',
       ],
     },
     displayPhoto: {
-      confirm: [
-        '當月新品清楚可見',
+      required: [
+        '當月新品（' + CAMPAIGN_CONFIG.monthProduct + '）清楚可見',
         '商品陳列完整',
-        '畫面清楚、明亮',
-        '不要讓雜物遮住新品',
       ],
+      allowed: ['店內環境可適度入鏡但非必要'],
+      shooting: ['畫面清楚、明亮，不要讓雜物遮住新品'],
       reject: [
         '新品太小或無法辨識',
         '照片過暗或失焦',
         '陳列區被其他物品遮擋',
-        '拍攝角度無法確認陳列狀況',
       ],
     },
     visitPhoto: {
-      confirm: [
+      required: [
         '實際前往另一間 KMBA 簽約店家',
         '照片中可辨識該店家的 KT&G 陳列架',
         '有拜訪者或店家人員入鏡',
-        '畫面清楚，可確認拜訪情境',
       ],
+      allowed: ['畫面清楚，可確認拜訪情境'],
+      shooting: [],
       reject: [
         '非簽約店家或無法辨識陳列架',
         '只有自拍或空景，看不出拜訪情境',
         '畫面模糊、過暗',
-        '無法確認是否實際到店',
       ],
     },
   };
@@ -147,13 +226,14 @@
     return copy;
   }
 
-  function formatAnswer({ conclusion, details, reminder, nextStep, suggestions, showFeedback }) {
+  function formatAnswer({ conclusion, details, reminder, nextStep, suggestions, showFeedback, images }) {
     return {
       conclusion: conclusion || '',
       details: details || [],
       reminder: reminder || '',
       nextStep: nextStep ? stripDecemberContent(nextStep) : '',
       suggestions: (suggestions || []).slice(0, 3),
+      images: images || [],
       showFeedback: showFeedback,
     };
   }
@@ -313,7 +393,6 @@
 
   function giftCardTierLines() {
     return [
-      '每月依大家完成任務的積分排名，並參考提交時間進行排序。',
       '第 1～20 名：500 元商品卡',
       '第 21～40 名：200 元商品卡',
       '第 41～100 名：100 元商品卡',
@@ -321,14 +400,88 @@
     ];
   }
 
+  /** 對外：積分怎麼算 */
+  function activityPointsLines() {
+    const p = ACTIVITY_POINTS;
+    return [
+      '📝 品牌隨堂考：完成即可獲得 ' + p.quizComplete + ' 分',
+      '📸 新品陳列任務：審核通過獲得 ' + p.displayApproved + ' 分',
+      '🙋 客人推薦任務：審核通過獲得 ' + p.customerApproved + ' 分',
+      '',
+      '常態任務每月積分上限為 ' + p.monthlyCap + ' 分。',
+      '',
+      '積分除了影響每月排名，也會影響可獲得的抽獎券張數喔！🎟️',
+    ];
+  }
+
+  /** 對外：排行榜怎麼排名 */
+  function publicRankingLines() {
+    const cap = ACTIVITY_POINTS.monthlyCap;
+    return [
+      '完成品牌隨堂考、新品陳列及客人推薦任務，都可以累積當月任務積分。',
+      '常態任務每月最高可累積 ' + cap + ' 分，積分越高，排名越有優勢！',
+      '如遇同分或特殊排名情況，將依活動相關規則進行排名認定。',
+      '',
+      ...giftCardTierLines(),
+    ];
+  }
+
+  /** 對外：抽獎券門檻 */
+  function raffleTicketRulesLines(includeVisit) {
+    const lines = [
+      '當月積分達 100 分 → 1 張',
+      '當月積分達 200 分 → 2 張',
+      '當月積分達 300 分 → 3 張',
+    ];
+    if (includeVisit) {
+      lines.push('拜訪任務另行計算：每完成一間 +1 張，每月最多 5 間。');
+    }
+    return lines;
+  }
+
+  function septemberTasksLines() {
+    const p = ACTIVITY_POINTS;
+    const product = CAMPAIGN_CONFIG.monthProduct;
+    return [
+      '🏁 ' + CAMPAIGN_CONFIG.monthLabel + '任務',
+      '',
+      '📝 品牌隨堂測驗',
+      '完成即可獲得 ' + p.quizComplete + ' 分。',
+      '',
+      '📸 新品陳列任務',
+      '完成' + product + '新品陳列並上傳照片，審核通過 +' + p.displayApproved + ' 分。',
+      '',
+      '🙋 客人推薦任務',
+      '向客人推薦本月活動新品並依規定上傳照片，審核通過 +' + p.customerApproved + ' 分。',
+      '',
+      '常態任務每月積分上限 ' + p.monthlyCap + ' 分。',
+      '如有任務資格或特殊狀況，請洽各區業務確認。',
+    ];
+  }
+
   function checklistBlock(type) {
     const c = PHOTO_CHECKLIST[type];
     if (!c) return [];
-    const lines = ['提交前請確認：'];
-    c.confirm.forEach((item) => lines.push('✓ ' + item));
-    lines.push('');
-    lines.push('以下情況可能無法通過：');
-    c.reject.forEach((item) => lines.push('✗ ' + item));
+    const lines = [];
+    if (c.required && c.required.length) {
+      lines.push('【必要】');
+      c.required.forEach(function (item) { lines.push('• ' + item); });
+    }
+    if (c.allowed && c.allowed.length) {
+      lines.push('');
+      lines.push('【可以】');
+      c.allowed.forEach(function (item) { lines.push('• ' + item); });
+    }
+    if (c.shooting && c.shooting.length) {
+      lines.push('');
+      lines.push('【拍攝】');
+      c.shooting.forEach(function (item) { lines.push('• ' + item); });
+    }
+    if (c.reject && c.reject.length) {
+      lines.push('');
+      lines.push('【不建議】');
+      c.reject.forEach(function (item) { lines.push('• ' + item); });
+    }
     lines.push('');
     lines.push('符合以上條件，較有機會通過審核。最終仍以活動單位審核結果為準。');
     return lines;
@@ -341,19 +494,14 @@
       keywords: ['任務類型解說', '任务类型解说', '任務類型', '全部任務比較', '全部任務'],
       match(n) { return /任務類型解說|任务类型解说|全部任務比較/.test(n); },
       get(depth) {
-        const conclusion = '常態任務每月上限 300 分，另有拜訪任務可獲抽獎券。';
-        const details = [
-          '【常態任務】LINE 不定時發布，提交越早越好',
-          '• 品牌隨堂考 → 100 分',
-          '• 客人推薦照片 → 100 分',
-          '• 新品陳列照片 → 100 分',
-          '100 分 → 1 張抽獎券；200 分 → 2 張；300 分以上 → 3 張',
+        const details = septemberTasksLines();
+        details.push(
           '',
           '【拜訪任務】前往其他 KMBA 簽約店家拍照，LINE 上傳，每月 20 日審核',
-          '每完成一間店 → 1 張抽獎券（每月最多 5 間）',
-        ];
+          '每完成一間店 → 1 張抽獎券（每月最多 5 間，不計一般積分）',
+        );
         return formatAnswer({
-          conclusion,
+          conclusion: CAMPAIGN_CONFIG.monthLabel + '主要任務包含品牌隨堂測驗、新品陳列及客人推薦；另有拜訪任務可獲抽獎券。',
           details,
           nextStep: step('tasks'),
           suggestions: RELATED_QUESTIONS.tasks,
@@ -363,26 +511,16 @@
     {
       id: 'rewards_guide',
       topic: 'giftCard',
-      keywords: ['獎勵有哪些', '奖励有哪些', '獎勵解說', '奖励解说'],
-      match(n) { return /獎勵有哪些|奖励有哪些|獎勵解說/.test(n); },
-      get(depth, query) {
-        const detailed = depth === 'detailed';
-        const details = detailed ? [
-          '【商品卡】依每月積分排行發放（非禮券）',
-          ...giftCardTierLines(),
-          '',
-          '【抽獎券】完成任務累積，參加雙月抽獎',
-          ...bimonthlyDetailsForQuery(query, detailed),
-        ] : [
-          '【商品卡】依每月積分排行：500 / 200 / 100 元',
-          '【抽獎券】完成任務累積，參加雙月抽獎',
-          bimonthlyDetailsForQuery(query, false)[0] || '',
-        ].filter(Boolean);
+      keywords: ['獎勵有哪些', '奖励有哪些', '獎勵解說', '奖励解说', '有什麼獎品', '有什么奖品', '可以拿什麼', '可以拿什么'],
+      match(n) { return /獎勵有哪些|奖励有哪些|獎勵解說|有什麼獎品|有什么奖品|可以拿什麼|可以拿什么/.test(n); },
+      get() {
         return formatAnswer({
-          conclusion: '獎勵分為商品卡（依排行）與抽獎券（依任務累積）。' + bimonthlyPrizeConclusion(),
-          details,
-          nextStep: detailed ? step('giftCard') : '',
-          suggestions: RELATED_QUESTIONS.giftCard.slice(0, detailed ? 3 : 2),
+          conclusion: 'KMBA 菁英計畫主要獎勵包含：\n\n🎁 每月積分排行榜商品卡\n🎟️ 雙月抽獎',
+          details: ['想看哪一個？請選擇下方按鈕深入了解。'],
+          options: ['商品卡級距', '抽獎券規則', '雙月抽獎獎項有哪些？'],
+          optionTopic: 'rewardDeepDive',
+          showFeedback: false,
+          suggestions: ['商品卡怎麼拿？', '抽獎券怎麼拿？', '雙月抽獎獎項有哪些？'],
         });
       },
     },
@@ -411,10 +549,7 @@
           brief.details.push(
             '',
             '【任務與積分】',
-            '• 品牌隨堂考 → 100 分',
-            '• 客人推薦照片 → 100 分',
-            '• 新品陳列照片 → 100 分',
-            '常態任務月上限 300 分，提交越早越好',
+            ...activityPointsLines(),
           );
         }
         return brief;
@@ -526,22 +661,78 @@
     {
       id: 'visit_partner_stores',
       topic: 'visitTask',
-      keywords: ['合作店家', '合作店', '簽約店家', '可以拜訪哪些', '哪些店家', '哪些店', '會通知', '通知店家'],
+      keywords: ['合作店家', '合作店', '簽約店家', '可以拜訪哪些', '哪些店家', '哪些店', '會通知', '通知店家', '去哪一間', '可以拜訪誰', '店家名單', '店名單'],
       match(n) {
-        return (/合作|簽約/.test(n) && /店|店家/.test(n) && /拜訪|訪店|哪些|哪幾|通知|會通知/.test(n))
-          || /拜訪.*哪些.*店|哪些.*簽約/.test(n)
+        return (/合作|簽約/.test(n) && /店|店家/.test(n) && /拜訪|訪店|哪些|哪幾|通知|會通知|名單|去哪/.test(n))
+          || /拜訪.*哪些.*店|哪些.*簽約|去哪一間|可以拜訪誰|店家名單/.test(n)
           || (/通知/.test(n) && /拜訪|店家|店/.test(n));
       },
       get() {
         return formatAnswer({
-          conclusion: '拜訪任務需前往其他 KMBA 簽約店家完成；合作店家名單不會逐店推送，請向區域業務確認。',
+          conclusion: '拜訪任務合作店家名單及可拜訪對象，請洽各區業務確認。K小助目前不提供合作店家名單，以各區業務提供的資訊為準。',
           details: [
-            '不可拜訪自己的店，需到其他簽約店家完成指定拍照。',
-            '到達後與該店 KT&G 陳列架合照，並在 LINE 上傳。',
-            '每完成一間 → 1 張抽獎券，每月最多 5 間。',
+            '不可拜訪自己的店，需到其他 KMBA 簽約店家完成指定拍照。',
+            '每完成一間有效拜訪 → 1 張抽獎券，每月最多 5 間（不計一般積分）。',
+            '須依活動規定提供佐證；特殊資格判定請洽各區業務。',
           ],
           nextStep: step('visitTask'),
           suggestions: RELATED_QUESTIONS.visitTask.slice(0, 2),
+        });
+      },
+    },
+    {
+      id: 'points_calc',
+      topic: 'points',
+      keywords: ['我的積分怎麼算', '積分怎麼算', '积分怎么算', '積分如何計算', '分数怎么算', '分數怎麼算', '積分計算', '一個月最多幾分', '一个月最多几分', '任務幾分', '任务几分', '最多幾分'],
+      match(n) {
+        return (/積分|积分|分數|分数/.test(n) && /怎麼算|怎么算|如何計|如何计|計算|计算|最多幾分|最多几分|幾分|几分/.test(n)
+          && !/排名|排行|券|張/.test(n))
+          || /一個月最多|一个月最多|任務幾分|任务几分/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '每月完成指定任務即可累積積分 ⭐',
+          details: activityPointsLines(),
+          nextStep: step('giftCard'),
+          suggestions: CONTEXTUAL_FOLLOWUPS.points_calc,
+        });
+      },
+    },
+    {
+      id: 'internal_ranking_redirect',
+      topic: 'giftCard',
+      keywords: ['時間加成', '时间加成', '時間加分', '答題排名', '原始分數', '第一次有效', '重複作答', '答題優先序'],
+      match(n) {
+        return /時間加成|时间加成|時間加分|答題排名|原始分數|第一次有效|重複作答|答題優先序|內部排名|小數積分/.test(n);
+      },
+      get() {
+        return formatAnswer({
+          conclusion: '排行榜將依當月任務完成狀況及積分進行排名 🏆',
+          details: publicRankingLines(),
+          nextStep: step('giftCard'),
+          suggestions: ['我的積分怎麼算？', '100分有幾張抽獎券？', '商品卡怎麼拿？'],
+        });
+      },
+    },
+    {
+      id: 'raffle_tickets_how',
+      topic: 'raffleTicket',
+      keywords: ['抽獎券怎麼拿', '抽奖券怎么拿', '抽獎券如何獲得', '怎麼拿抽獎券', '怎么拿抽奖券', '抽獎券規則'],
+      match(n) {
+        return (/抽獎券|抽奖券/.test(n) && /怎麼拿|怎么拿|如何獲|如何获|怎麼得|怎么得/.test(n))
+          || n === '抽獎券規則' || n === '抽奖券规则';
+      },
+      get(depth, query) {
+        const details = [
+          ...raffleTicketRulesLines(depth === 'detailed'),
+          '',
+          ...bimonthlyDetailsForQuery(query, depth === 'detailed'),
+        ];
+        return formatAnswer({
+          conclusion: '抽獎券依當月活動積分兌換，並可透過拜訪任務額外累積。',
+          details,
+          nextStep: step('raffleTicket'),
+          suggestions: CONTEXTUAL_FOLLOWUPS.raffle_tickets_how,
         });
       },
     },
@@ -552,17 +743,13 @@
       match(n) { return /100分|一百分/.test(n) && /券|張|张|幾|几/.test(n); },
       get(depth) {
         const brief = formatAnswer({
-          conclusion: '100 分可以獲得 1 張抽獎券。',
-          details: ['200 分可獲得 2 張，300 分以上可獲得 3 張。'],
+          conclusion: '當月積分達 100 分，可獲得 1 張抽獎券。',
+          details: ['200 分 → 2 張；300 分 → 3 張。'],
           nextStep: step('raffleTicket'),
-          suggestions: RELATED_QUESTIONS.raffleTicket,
+          suggestions: CONTEXTUAL_FOLLOWUPS.raffle_100,
         });
         if (depth === 'detailed') {
-          brief.details.push(
-            '日常任務每月最多可累積 300 分，因此每月最多可換 3 張抽獎券。',
-            '每兩個月重新計算一次，日常任務兩個月最多可累積 6 張。',
-            '拜訪任務另行計算，每月最多 5 張，每兩個月最多 10 張。',
-          );
+          brief.details.push('', ...raffleTicketRulesLines(true));
         }
         return brief;
       },
@@ -574,46 +761,44 @@
       match(n) { return /200分/.test(n) && /券|張|张|幾|几/.test(n); },
       get(depth) {
         return formatAnswer({
-          conclusion: '200 分可以獲得 2 張抽獎券。',
+          conclusion: '當月積分達 200 分，可獲得 2 張抽獎券。',
           details: depth === 'detailed'
-            ? ['100 分 → 1 張；300 分以上 → 3 張。', '日常任務每月最多 300 分。']
-            : ['100 分 → 1 張；300 分以上 → 3 張。'],
+            ? ['100 分 → 1 張；300 分 → 3 張。', ...raffleTicketRulesLines(false)]
+            : ['100 分 → 1 張；300 分 → 3 張。'],
           nextStep: step('raffleTicket'),
-          suggestions: RELATED_QUESTIONS.raffleTicket,
+          suggestions: CONTEXTUAL_FOLLOWUPS.raffle_200,
         });
       },
     },
     {
       id: 'raffle_300',
       topic: 'raffleTicket',
-      keywords: ['300分幾張', '300分以上幾張', '300分以上', '300分以上幾張'],
+      keywords: ['300分幾張', '300分有幾張', '300分', '300分以上幾張'],
       match(n) { return /300分/.test(n) && /券|張|张|幾|几|以上/.test(n); },
       get() {
         return formatAnswer({
-          conclusion: '300 分以上可以獲得 3 張抽獎券。',
-          details: ['100 分 → 1 張；200 分 → 2 張。', '常態任務每月上限 300 分。'],
+          conclusion: '當月積分達 300 分，可獲得 3 張抽獎券。',
+          details: ['100 分 → 1 張；200 分 → 2 張。', '常態任務每月積分上限 300 分。'],
           nextStep: step('raffleTicket'),
-          suggestions: RELATED_QUESTIONS.raffleTicket,
+          suggestions: CONTEXTUAL_FOLLOWUPS.raffle_300,
         });
       },
     },
     {
       id: 'raffle_rules_full',
       topic: 'raffleTicket',
-      keywords: ['完整說明抽獎', '抽獎規則', '抽奖规则', '完整抽獎', '雙月抽獎規則'],
-      match(n) { return /完整.*抽|抽獎規則|抽奖规则|雙月.*規|双月.*规/.test(n); },
+      keywords: ['完整說明抽獎', '抽獎規則', '抽奖规则', '完整抽獎', '雙月抽獎規則', '抽獎券規則'],
+      match(n) { return /完整.*抽|抽獎規則|抽奖规则|雙月.*規|双月.*规|抽獎券規則/.test(n); },
       get(depth, query) {
         return formatAnswer({
-          conclusion: '抽獎券依積分兌換，每兩個月抽獎一次。' + bimonthlyPrizeConclusion(),
+          conclusion: '抽獎券依當月活動積分兌換，每兩個月抽獎一次。' + bimonthlyPrizeConclusion(),
           details: [
-            '100 分 → 1 張；200 分 → 2 張；300 分以上 → 3 張。',
-            '日常任務每月最多 300 分，兩個月最多 6 張。',
-            '拜訪任務每完成一間店 1 張，每月最多 5 張，兩個月最多 10 張。',
+            ...raffleTicketRulesLines(true),
             '',
             ...bimonthlyDetailsForQuery(query, true),
           ],
           nextStep: step('drawTime'),
-          suggestions: RELATED_QUESTIONS.raffleTicket,
+          suggestions: CONTEXTUAL_FOLLOWUPS.raffle_rules_full,
         });
       },
     },
@@ -800,7 +985,7 @@
       },
       get() {
         return formatAnswer({
-          conclusion: '需要保留新品。照片中需清楚呈現當月新品。',
+          conclusion: '需要保留新品。照片中需清楚呈現當月新品（' + CAMPAIGN_CONFIG.monthProduct + '）。',
           details: [
             '客人推薦照片與新品陳列照片皆需讓當月新品清楚可見。',
             '新品被遮擋、過小或無法辨識，較可能無法通過審核。',
@@ -896,8 +1081,8 @@
       match(n) { return /積分相同/.test(n) && /排名/.test(n); },
       get() {
         return formatAnswer({
-          conclusion: '積分相同時，以提交時間較早者優先。',
-          details: ['需當月完成至少 1 項任務才有排行資格。'],
+          conclusion: '如遇同分或特殊排名情況，將依活動相關規則進行排名認定。',
+          details: publicRankingLines(),
           nextStep: step('giftCard'),
           suggestions: RELATED_QUESTIONS.giftCard,
         });
@@ -906,14 +1091,14 @@
     {
       id: 'ranking_calc',
       topic: 'giftCard',
-      keywords: ['每月排名怎麼計算', '排名怎麼算', '積分相同怎麼排名', '同分'],
-      match(n) { return /排名/.test(n) && /計算|计算|怎麼|同分|相同/.test(n); },
+      keywords: ['每月排名怎麼計算', '排名怎麼算', '排行榜怎麼排名', '積分相同怎麼排名', '同分'],
+      match(n) { return /排名|排行/.test(n) && /計算|计算|怎麼|同分|相同|排名/.test(n); },
       get() {
         return formatAnswer({
-          conclusion: '商品卡依當月積分排行發放，同分時以提交時間較早者優先。',
-          details: giftCardTierLines(),
+          conclusion: '排行榜將依當月任務完成狀況及積分進行排名 🏆',
+          details: publicRankingLines(),
           nextStep: step('giftCard'),
-          suggestions: RELATED_QUESTIONS.giftCard,
+          suggestions: CONTEXTUAL_FOLLOWUPS.ranking_calc,
         });
       },
     },
@@ -938,10 +1123,13 @@
       match(n) { return /隨堂考|問卷|考題|測驗|小考|答題/.test(n) && !/照片/.test(n); },
       get() {
         return formatAnswer({
-          conclusion: '品牌隨堂考完成後可獲得 100 分，計入當月常態任務積分。',
-          details: ['LINE 不定時發布，提交越早越好。', '常態任務每月上限 300 分。'],
+          conclusion: '品牌隨堂考完成即可獲得 ' + ACTIVITY_POINTS.quizComplete + ' 分，計入當月常態任務積分。',
+          details: [
+            'LINE 不定時發布，提交越早越好。',
+            '常態任務每月積分上限 ' + ACTIVITY_POINTS.monthlyCap + ' 分。',
+          ],
           nextStep: step('quiz'),
-          suggestions: RELATED_QUESTIONS.tasks,
+          suggestions: CONTEXTUAL_FOLLOWUPS.quiz_task,
         });
       },
     },
@@ -952,8 +1140,8 @@
       match(n) { return /不通過|不通过/.test(n) && /照片|推薦|客人/.test(n); },
       get() {
         return formatAnswer({
-          conclusion: '客人推薦照片若缺少客人、新品或推薦互動，較可能無法通過。',
-          details: checklistBlock('customerPhoto').slice(4),
+          conclusion: '客人推薦照片若缺少推薦情境、當月新品或畫面不清，較可能無法通過。',
+          details: checklistBlock('customerPhoto'),
           nextStep: step('photoReview'),
           suggestions: RELATED_QUESTIONS.customerPhoto,
         });
@@ -1002,16 +1190,62 @@
       },
     },
     {
+      id: 'sept_product_info',
+      topic: 'tasks',
+      keywords: [
+        '9月新品是什麼', '九月新品', '9月新品', '本月新品', '新品是什麼', '新品介绍', '新品介紹',
+        '新品知識', '新品知识', '藍寶堅尼', '德尼露', 'lamborghini', 'tonino', '8號新品',
+      ],
+      match(n) {
+        return (/九月|9月|本月/.test(n) && /新品|新產品|新产品/.test(n))
+          || /藍寶堅尼|德尼露|lamborghini|tonino/.test(n)
+          || /新品.*什麼|什麼新品|新品介紹|新品介绍|新品知識|新品知识/.test(n)
+          || n === '9月新品是什麼';
+      },
+      get() {
+        const specs = CAMPAIGN_CONFIG.productSpecs;
+        const featureLines = CAMPAIGN_CONFIG.productFeatures.map(function (line) { return '✦ ' + line; });
+        return formatAnswer({
+          conclusion: CAMPAIGN_CONFIG.monthLabel + '新品為「' + CAMPAIGN_CONFIG.monthProduct + '」— ' + CAMPAIGN_CONFIG.productTagline,
+          details: featureLines.concat([
+            '',
+            '建議零售價 ' + specs.price + '｜焦油 ' + specs.tar + '｜尼古丁 ' + specs.nicotine,
+            '特色：' + specs.filter,
+            '',
+            '下方為官方新品知識圖，供您參考 👇',
+          ]),
+          images: CAMPAIGN_CONFIG.productImages.slice(),
+          nextStep: step('displayPhoto'),
+          suggestions: CONTEXTUAL_FOLLOWUPS.sept_product_info,
+        });
+      },
+    },
+    {
       id: 'monthly_tasks',
       topic: 'tasks',
-      keywords: ['每月有哪些任務', '每月任務'],
-      match(n) { return /每月/.test(n) && /任務|任务/.test(n); },
+      keywords: ['每月有哪些任務', '每月任務', '這個月有哪些任務', '这个月有哪些任务', '本月任務', '本月任务'],
+      match(n) { return (/每月|本月|這個月|这个月/.test(n) && /任務|任务/.test(n)) || n === '這個月有哪些任務'; },
       get() {
         return formatAnswer({
-          conclusion: '每月常態任務包含品牌隨堂考、客人推薦照片、新品陳列照片，另有拜訪任務。',
-          details: ['常態任務 LINE 不定時發布，月上限 300 分。'],
+          conclusion: CAMPAIGN_CONFIG.monthLabel + '主要任務：品牌隨堂測驗、新品陳列、客人推薦。',
+          details: septemberTasksLines(),
           nextStep: step('tasks'),
-          suggestions: RELATED_QUESTIONS.tasks,
+          suggestions: CONTEXTUAL_FOLLOWUPS.monthly_tasks,
+        });
+      },
+    },
+    {
+      id: 'display_task_points',
+      topic: 'displayPhoto',
+      keywords: ['陳列任務幾分', '陈列任务几分', '新品陳列幾分', '陳列照片幾分'],
+      match(n) { return /陳列|陈列|新品/.test(n) && /幾分|几分|多少分/.test(n); },
+      get() {
+        const pts = ACTIVITY_POINTS.displayApproved;
+        return formatAnswer({
+          conclusion: '新品陳列任務審核通過 +' + pts + ' 分；未完成或未通過 +0 分。',
+          details: ['本月新品：' + CAMPAIGN_CONFIG.monthProduct + '（' + CAMPAIGN_CONFIG.monthProductBrand + '）'],
+          nextStep: step('displayPhoto'),
+          suggestions: CONTEXTUAL_FOLLOWUPS.display_photo,
         });
       },
     },
@@ -1045,7 +1279,7 @@
     },
     積分: {
       prompt: '請問你想了解哪一部分？',
-      options: ['100分有幾張抽獎券？', '商品卡怎麼拿？', '任務類型解說'],
+      options: ['我的積分怎麼算？', '100分有幾張抽獎券？', '商品卡怎麼拿？'],
       topic: 'pointSelect',
     },
     拜訪: {
@@ -1260,9 +1494,10 @@
       '可以拿幾張抽獎券': '拜訪一間有幾張券',
     },
     points: {
-      '怎麼獲得': '任務類型解說',
-      '每月最多幾分': '任務類型解說',
-      '怎麼換抽獎券': '100分有幾張抽獎券',
+      '怎麼獲得': '我的積分怎麼算？',
+      '我的積分怎麼算？': '我的積分怎麼算？',
+      '每月最多幾分': '我的積分怎麼算？',
+      '怎麼換抽獎券': '抽獎券怎麼拿？',
       '如何影響商品卡排名': '每月排名怎麼計算？',
     },
     ranking: {
@@ -1317,7 +1552,7 @@
       id: 'points',
       terms: ['積分', '积分', '分數', '分数'],
       question: '請問你想了解積分的哪一項？',
-      options: ['怎麼獲得', '每月最多幾分', '怎麼換抽獎券', '如何影響商品卡排名'],
+      options: ['我的積分怎麼算？', '怎麼換抽獎券', '如何影響商品卡排名'],
       topic: 'pointsClarify',
     },
     {
@@ -1504,13 +1739,20 @@
       && !!(formatted.conclusion);
     const reply = buildReplyText(formatted, intent !== 'feedback' && intent !== 'welcome' && intent !== 'greeting');
     const track = resolveTracking(intent, formatted, tracking);
+    let suggestions = formatted.suggestions || [];
+    if (track.faqId && CONTEXTUAL_FOLLOWUPS[track.faqId]) {
+      suggestions = CONTEXTUAL_FOLLOWUPS[track.faqId].slice(0, 3);
+    } else if (suggestions.length > 3) {
+      suggestions = suggestions.slice(0, 3);
+    }
     return {
       reply,
       conclusion: formatted.conclusion,
       details: formatted.details || [],
       reminder: formatted.reminder || '',
       nextStep: formatted.nextStep || '',
-      suggestions: formatted.suggestions || [],
+      suggestions: suggestions,
+      images: formatted.images || [],
       options: formatted.options || [],
       optionTopic: formatted.optionTopic || null,
       showFeedback,
@@ -1640,13 +1882,20 @@
     }
 
     const FALLBACK_MAP = {
-      任務內容: '任務',
-      積分與商品卡: '積分',
-      抽獎券: '抽獎',
+      任務內容: '這個月有哪些任務？',
+      積分與商品卡: '我的積分怎麼算？',
+      抽獎券: '抽獎券怎麼拿？',
       拜訪任務: '拜訪任務怎麼做？',
       照片規則: '照片',
       拜訪任務怎麼做: '拜訪任務',
       全部任務比較: '任務類型解說',
+      商品卡級距: '每月積分排行商品卡差別',
+      抽獎券規則: '請完整說明抽獎規則',
+      '我的積分怎麼算？': '我的積分怎麼算？',
+      '抽獎券怎麼拿？': '抽獎券怎麼拿？',
+      '這個月有哪些任務？': '這個月有哪些任務？',
+      '9月新品是什麼？': '9月新品是什麼？',
+      '雙月抽獎怎麼玩？': '請完整說明抽獎規則',
     };
     const fbKey = normalize(query);
     if (FALLBACK_MAP[query] || FALLBACK_MAP[fbKey]) {
@@ -1748,6 +1997,10 @@
     canShowDecemberReward,
     sanitizeVisibleAnswer,
     getAnswerDepth,
+    APP_VERSION,
+    CAMPAIGN_CONFIG,
+    ACTIVITY_POINTS,
+    INTERNAL_RANKING,
     _debug: { normalize, KNOWLEDGE, matchKnowledge, getChatContext, isTopicOnlyInput, resolveTopicClarifyId },
   };
 })(window);
