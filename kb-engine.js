@@ -1891,15 +1891,12 @@
       全部任務比較: '任務類型解說',
       商品卡級距: '每月積分排行商品卡差別',
       抽獎券規則: '請完整說明抽獎規則',
-      '我的積分怎麼算？': '我的積分怎麼算？',
-      '抽獎券怎麼拿？': '抽獎券怎麼拿？',
-      '這個月有哪些任務？': '這個月有哪些任務？',
-      '9月新品是什麼？': '9月新品是什麼？',
       '雙月抽獎怎麼玩？': '請完整說明抽獎規則',
     };
     const fbKey = normalize(query);
-    if (FALLBACK_MAP[query] || FALLBACK_MAP[fbKey]) {
-      return answer(FALLBACK_MAP[query] || FALLBACK_MAP[fbKey]);
+    const fallbackTarget = FALLBACK_MAP[query] || FALLBACK_MAP[fbKey];
+    if (fallbackTarget && fallbackTarget !== query && normalize(fallbackTarget) !== fbKey) {
+      return answer(fallbackTarget);
     }
 
     if (isPhotoValidationQuery(query)) {

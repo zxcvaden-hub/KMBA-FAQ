@@ -993,47 +993,52 @@
       hasChatted = true;
       setLoading(true);
       setTimeout(function () {
-        if (typeof KB !== 'undefined' && KB.answer) {
-          const data = KB.answer(q);
-          debugLog('FAQ 回答', {
-            question: q,
-            faqId: data.faqId,
-            category: data.category,
-            intent: data.intent,
-            conclusion: getAnswerSummary(data),
-          });
-          addBotMsg(data, { messageId: messageId, question: q });
-          if (shouldLogChat(data)) {
-            const payload = {
-              action: 'create',
-              timestamp: new Date().toISOString(),
-              sessionId: KMBA_SESSION_ID,
-              messageId: messageId,
+        try {
+          if (typeof KB !== 'undefined' && KB.answer) {
+            const data = KB.answer(q);
+            debugLog('FAQ 回答', {
               question: q,
-              answer: getAnswerSummary(data),
-              faqId: data.faqId || data.intent || 'unknown',
-              category: data.category || data.optionTopic || 'unknown',
-              resolved: '',
-              device: getDeviceInfo(),
-              version: KMBA_APP_VERSION,
-              note: buildLogNote(messageId, data),
-              row: [
-                new Date().toISOString(),
-                KMBA_SESSION_ID,
-                q,
-                getAnswerSummary(data),
-                data.faqId || data.intent || 'unknown',
-                data.category || data.optionTopic || 'unknown',
-                '',
-                getDeviceInfo(),
-                KMBA_APP_VERSION,
-                buildLogNote(messageId, data),
-              ],
-            };
-            createChatLog(payload);
+              faqId: data.faqId,
+              category: data.category,
+              intent: data.intent,
+              conclusion: getAnswerSummary(data),
+            });
+            addBotMsg(data, { messageId: messageId, question: q });
+            if (shouldLogChat(data)) {
+              const payload = {
+                action: 'create',
+                timestamp: new Date().toISOString(),
+                sessionId: KMBA_SESSION_ID,
+                messageId: messageId,
+                question: q,
+                answer: getAnswerSummary(data),
+                faqId: data.faqId || data.intent || 'unknown',
+                category: data.category || data.optionTopic || 'unknown',
+                resolved: '',
+                device: getDeviceInfo(),
+                version: KMBA_APP_VERSION,
+                note: buildLogNote(messageId, data),
+                row: [
+                  new Date().toISOString(),
+                  KMBA_SESSION_ID,
+                  q,
+                  getAnswerSummary(data),
+                  data.faqId || data.intent || 'unknown',
+                  data.category || data.optionTopic || 'unknown',
+                  '',
+                  getDeviceInfo(),
+                  KMBA_APP_VERSION,
+                  buildLogNote(messageId, data),
+                ],
+              };
+              createChatLog(payload);
+            }
+          } else {
+            addMsg('系統載入中，請重新整理後再試。', 'system');
           }
-        } else {
-          addMsg('系統載入中，請重新整理後再試。', 'system');
+        } catch (error) {
+          console.error('[KMBA] answer error:', error);
+          addMsg('回答時發生錯誤，請重新整理後再試。', 'system');
         }
         setLoading(false);
       }, 280);
