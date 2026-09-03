@@ -1,7 +1,7 @@
 # KMBA CLUB 2026 — 活動小助手
 
 KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜態網站）。  
-**目前版本：V.09**
+**目前版本：V0903**
 
 **線上版本：** [https://zxcvaden-hub.github.io/KMBA-FAQ/](https://zxcvaden-hub.github.io/KMBA-FAQ/)
 
@@ -95,7 +95,7 @@ KT&G 大韓菸草 **KMBA菁英計畫** 官方 FAQ 活動小助手（純前端靜
 | 檔案／目錄 | 用途 |
 |------------|------|
 | `index.html` | 活動小助手聊天介面（手機優先） |
-| `kb-engine.js` | 問答引擎（V.09） |
+| `kb-engine.js` | 問答引擎（V0903） |
 | `assets/` | 9 月新品知識圖等靜態資源 |
 | `kmba-logo.png` | LOGO 大頭貼 |
 | `lucky/index.html` | 雙月抽獎工具頁（操作端／觀看端，非公開入口） |
@@ -148,7 +148,7 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 
 | 版本 | 日期 | 說明 |
 |------|------|------|
-| **V.09** | 2026/09/03 | **9 月活動更新**：德尼露・藍寶堅尼 8 號新品 FAQ + 知識圖（`assets/`）；**對外積分規則**恢復 100×3、月上限 300、抽獎券 100/200/300；**內部排行榜算法**（時間加成等）不公開；首頁快捷重排；👍/👎 回饋 + 原因寫入 Sheet 備註；`traffic_type=USER/TEST`（`?test=1`）；情境式延伸問題 |
+| **V0903** | 2026/09/03 | **9 月活動更新**：德尼露・藍寶堅尼 8 號新品 FAQ + 知識圖（`assets/`）；**對外積分規則**恢復 100×3、月上限 300、抽獎券 100/200/300；**內部排行榜算法**（時間加成等）不公開；首頁快捷重排；👍/👎 回饋 + 原因寫入 Sheet 備註；`traffic_type=USER/TEST`（`?test=1`）；情境式延伸問題；修正問答無限迴圈 |
 | **V.0734** | 2026/07/30 | 修正問題比對停用詞；商品卡發放文案；`?debug=1` 除錯面板；lucky 頁更新錄影說明 |
 | **V.0733** | 2026/07/30 | 修正 LINE 手機快捷按鈕無反應（pointerdown、按鈕常駐顯示） |
 | **V.0732** | 2026/07/29 | 抽獎公平 FAQ 文案優化（客戶確認版）；清理本地殘留備份 |
@@ -184,7 +184,7 @@ https://zxcvaden-hub.github.io/KMBA-FAQ/?debug=1
 | F | FAQ 類別 | topic（如 `raffleTicket`） |
 | G | 是否已解決 | 初次空白；回饋後為 `YES` / `NO` |
 | H | 裝置 | 如 `iPhone / Safari` |
-| I | 版本 | 如 `V.09` |
+| I | 版本 | 如 `V0903` |
 | J | 備註 | 含 `messageId=KMBA-MSG-...` |
 
 ### Web App URL（前端使用 `/exec`）
@@ -207,7 +207,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 - 寫入 J 欄備註：`messageId=KMBA-MSG-...;intent=matched`
 - **一個問題只新增一列**
 - 點「👍 有解決」→ 更新同一列 G 欄為 `YES`
-- 點「👎 沒解決」→ 選原因後更新 G 欄為 `NO`，並在 J 欄寫入 `feedbackReason=...`（V.09）
+- 點「👎 沒解決」→ 選原因後更新 G 欄為 `NO`，並在 J 欄寫入 `feedbackReason=...`（V0903）
 - 回饋後顯示的分類選項**不會**再寫入新紀錄
 
 ### Google Apps Script
@@ -222,7 +222,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 - 寫入或更新失敗**不影響**客服回答
 - 一般使用者畫面**不顯示**任何錯誤
 - 開發測試可在瀏覽器 console 查看 `[KMBA Log]`，或使用 `?debug=1` 開啟畫面 debug 面板
-- J 欄備註可含 `traffic_type=USER|TEST`、`feedbackReason=...`（V.09 起）
+- J 欄備註可含 `traffic_type=USER|TEST`、`feedbackReason=...`（V0903 起）
 
 ### 不記錄的項目
 
@@ -232,7 +232,7 @@ https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0
 
 ---
 
-## V.09 FAQ 知識庫摘要（新增／重點）
+## V0903 FAQ 知識庫摘要（新增／重點）
 
 | faqId | 類別 | 說明 |
 |-------|------|------|

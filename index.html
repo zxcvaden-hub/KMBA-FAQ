@@ -506,7 +506,7 @@
           <p>KT&G 大韓菸草 · KMBA菁英計畫 2026</p>
         </div>
       </div>
-      <span class="badge">繁體中文｜版本 V.09</span>
+      <span class="badge">繁體中文｜版本 V0903</span>
     </header>
 
     <div class="messages" id="messages">
@@ -561,7 +561,7 @@
     <div class="debug-panel-body" id="debugBody"></div>
   </div>
 
-  <script src="kb-engine.js?v=09.2"></script>
+  <script src="kb-engine.js?v=V0903"></script>
   <script>
     const messagesEl = document.getElementById('messages');
     const typingEl = document.getElementById('typing');
@@ -570,7 +570,7 @@
     const sendBtn = document.getElementById('send');
     const LOGO_SRC = 'kmba-logo.png';
     const KMBA_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjTNHPh1mtr7gANezaRj4WC5gTUu-Dm8KzXRtj0ObrlhmxTo_LN_bEnWVUSvwa1ND0GQ/exec';
-    const KMBA_APP_VERSION = 'V.09';
+    const KMBA_APP_VERSION = 'V0903';
     const KMBA_SESSION_KEY = 'kmbaSessionId';
     const KMBA_TRAFFIC_TYPE = (function () {
       try {
@@ -1146,7 +1146,7 @@
 
     if (typeof KB === 'undefined' || !KB.answer) {
       addMsg('問答引擎載入失敗，請按 Ctrl+Shift+R 強制重新整理頁面。', 'system');
-    } else if (KB.APP_VERSION !== 'V.09') {
+    } else if (KB.APP_VERSION !== 'V0903') {
       console.warn('[KMBA] 引擎版本異常:', KB.APP_VERSION);
     }
   </script>

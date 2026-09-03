@@ -1,8 +1,8 @@
-/* KMBA CLUB 2026 V.09 — FAQ engine (static, no backend) */
+/* KMBA CLUB 2026 V0903 — FAQ engine (static, no backend) */
 (function (global) {
   'use strict';
 
-  const APP_VERSION = 'V.09';
+  const APP_VERSION = 'V0903';
 
   const CAMPAIGN_DATES = {
     decemberRevealAt: '2026-10-01T00:00:00+08:00',

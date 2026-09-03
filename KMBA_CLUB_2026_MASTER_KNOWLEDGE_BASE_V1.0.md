@@ -1,4 +1,4 @@
-# KMBA CLUB 2026 — Master Knowledge Base（V.09）
+# KMBA CLUB 2026 — Master Knowledge Base（V0903）
 
 > **K小助 FAQ** 僅使用「對外活動積分」。  
 > **內部排行榜算法** 記錄於 `kb-engine.js` → `INTERNAL_RANKING`，禁止出現在 FAQ。
@@ -46,4 +46,4 @@
 
 ## 商品卡 / 拜訪 / 雙月抽獎
 
-（同 V.09 對外規則，詳見 README）
+（同 V0903 對外規則，詳見 README）

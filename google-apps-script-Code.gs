@@ -25,7 +25,7 @@ function doGet() {
   return jsonOutput({
     success: true,
     service: 'KMBA客服紀錄',
-    version: 'V.09',
+    version: 'V0903',
   });
 }
 
