@@ -3,6 +3,9 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -558,7 +561,7 @@
     <div class="debug-panel-body" id="debugBody"></div>
   </div>
 
-  <script src="kb-engine.js?v=09.1"></script>
+  <script src="kb-engine.js?v=09.2"></script>
   <script>
     const messagesEl = document.getElementById('messages');
     const typingEl = document.getElementById('typing');
@@ -632,6 +635,17 @@
     }
 
     const KMBA_SESSION_ID = getOrCreateSessionId();
+
+    function getAnswerErrorMessage(error) {
+      if (error && error.name === 'RangeError') {
+        return '程式版本衝突（瀏覽器快取舊版）。請按 Ctrl+Shift+R 強制重新整理，或改用無痕視窗再開一次。';
+      }
+      if (KMBA_DEBUG && error && error.message) {
+        return '回答時發生錯誤：' + error.message;
+      }
+      return '回答時發生錯誤，請按 Ctrl+Shift+R 強制重新整理後再試。';
+    }
+
     console.log('[KMBA Session]', KMBA_SESSION_ID);
 
     function createMessageId() {
@@ -1038,7 +1052,7 @@
           }
         } catch (error) {
           console.error('[KMBA] answer error:', error);
-          addMsg('回答時發生錯誤，請重新整理後再試。', 'system');
+          addMsg(getAnswerErrorMessage(error), 'system');
         }
         setLoading(false);
       }, 280);
@@ -1128,6 +1142,12 @@
     });
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', scrollToBottom);
+    }
+
+    if (typeof KB === 'undefined' || !KB.answer) {
+      addMsg('問答引擎載入失敗，請按 Ctrl+Shift+R 強制重新整理頁面。', 'system');
+    } else if (KB.APP_VERSION !== 'V.09') {
+      console.warn('[KMBA] 引擎版本異常:', KB.APP_VERSION);
     }
   </script>
 </body>
