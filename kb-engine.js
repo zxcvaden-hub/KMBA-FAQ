@@ -1812,7 +1812,14 @@
     );
   }
 
-  function answer(query) {
+  function answer(query, callDepth) {
+    callDepth = callDepth || 0;
+    if (callDepth > 12) {
+      return packResult(formatAnswer({
+        conclusion: '問題處理次數過多，請重新整理頁面後再試，或直接描述你想了解的內容。',
+        showFeedback: false,
+      }), 'fallback');
+    }
     query = (query || '').trim();
     if (!query) {
       return packResult(formatAnswer({
@@ -1867,7 +1874,7 @@
       if (resolved) {
         const mapped = (ctx.optionMap && ctx.optionMap[resolved]) || resolved;
         clearChatContext();
-        return answer(mapped);
+        return answer(mapped, callDepth + 1);
       }
     }
 
@@ -1896,7 +1903,7 @@
     const fbKey = normalize(query);
     const fallbackTarget = FALLBACK_MAP[query] || FALLBACK_MAP[fbKey];
     if (fallbackTarget && fallbackTarget !== query && normalize(fallbackTarget) !== fbKey) {
-      return answer(fallbackTarget);
+      return answer(fallbackTarget, callDepth + 1);
     }
 
     if (isPhotoValidationQuery(query)) {
