@@ -224,11 +224,11 @@
     </div>
     <div class="hero-caption">
       <div class="tag">公 平 · 公 正 · 公 開 · 可 驗 證</div>
-      <div class="sub">KT&amp;G 大韓菸草 · KMBA菁英計畫 2026 雙月抽獎（V0734）</div>
+      <div class="sub">KT&amp;G 大韓菸草 · KMBA菁英計畫 2026 10/15 正式抽獎（V1015）</div>
       <div class="hero-badges">
         <span>🎲 可驗證隨機</span>
-        <span>💳 10月 商品卡1,000元×15</span>
-        <span id="decBadge" style="display:none">💳 12月 商品卡2,000元×15</span>
+        <span>💳 1,000元商品卡 ×15</span><span>🎁 德尼祿 × 藍寶堅尼8號聯名精品毛巾 ×10</span>
+        
         <span>🎬 全程螢幕錄影</span>
         <span>🔒 離線運作</span>
       </div>
@@ -238,7 +238,7 @@
     <section class="panel" id="stepImport">
       <div class="step-title"><span class="step-no">1</span>匯入參加名單</div>
       <div class="step-hint">
-        上傳活動匯出的 <b>CSV 名單</b>（含標題列），系統會自動辨識「姓名／店別／抽獎券總數」欄位。<br />
+        上傳 10/15 已核對的<b>正式抽獎券 CSV</b>（含標題列）。每券一列，需有「統一店名」及「券號」欄位；不得使用未驗證的排行榜直接抽獎。<br />
         支援 UTF-8 與 Big5（Excel 另存）編碼。也可改用最下方手動貼上。
       </div>
 
@@ -251,11 +251,11 @@
       <div id="mapBox" style="display:none">
         <div class="row" style="margin-top:14px">
           <div>
-            <label>姓名欄位</label>
+            <label>正式店名欄位</label>
             <select id="colName"></select>
           </div>
           <div>
-            <label>店別欄位（顯示用，可不選）</label>
+            <label>備註欄位（可不選）</label>
             <select id="colStore"></select>
           </div>
           <div>
@@ -263,30 +263,30 @@
             <select id="colRegion"></select>
           </div>
           <div>
-            <label>抽獎券數欄位</label>
+            <label>券數欄位（逐券清單請選「每券一張」）</label>
             <select id="colTickets"></select>
           </div>
         </div>
         <div class="row" style="margin-top:12px">
           <div style="flex:0 0 100%">
-            <label>重複參加者處理（影響「同一人最多中一次」）</label>
+            <label>同店處理（固定為同店合併，一店最多中一次）</label>
             <select id="dupMode">
-              <option value="name">同「姓名」合併、券數加總（建議）</option>
-              <option value="namestore">同「姓名＋店別」合併、券數加總</option>
-              <option value="row">每筆資料各自計算（不合併）</option>
+              <option value="name">同「正式店名」合併、券數加總</option>
+              
+              
             </select>
           </div>
         </div>
         <label class="check" style="margin-top:10px">
-          <input type="checkbox" id="fuzzyMerge" checked />
+          <input type="checkbox" id="fuzzyMerge" checked disabled />
           合併時忽略英文大小寫與空白差異（例如 <code>Terminal one Tpe</code> 與 <code>TERMINAL ONE TPE</code> 視為相同）
         </label>
       </div>
 
       <details style="margin-top:14px">
         <summary>改用手動貼上名單</summary>
-        <div class="step-hint" style="margin-top:10px">每行一位：<b>姓名,抽獎券數</b>。支援逗號、Tab 或空白分隔。</div>
-        <textarea id="participants" placeholder="大韓夜店,12&#10;寶亨小酒館,8&#10;王小明,5"></textarea>
+        <div class="step-hint" style="margin-top:10px">每行一店：<b>統一店名,合格券數</b>。僅限事先按 8、9 月積分、排名與同店規則完成驗證的數據；每店最多 6 張。</div>
+        <textarea id="participants" placeholder="甲店,3&#10;乙店,6"></textarea>
       </details>
 
       <div class="actions">
@@ -295,7 +295,7 @@
       </div>
       <div class="alert err" id="parseErr"></div>
       <div class="stat" id="parseStat" style="display:none">
-        <div>有效參加者：<b id="cntPeople">0</b> 位｜抽獎券總數：<b id="cntTickets">0</b> 張</div>
+        <div>有效店家：<b id="cntPeople">0</b> 位｜抽獎券總數：<b id="cntTickets">0</b> 張</div>
         <div style="margin-top:8px" class="k">名單快照（SHA-256，開獎前請先公告此碼）：</div>
         <div class="hash" id="listHash">—</div>
         <div class="k" style="margin-top:10px">名單預覽（依券數高至低）：</div>
@@ -308,21 +308,9 @@
 
     <!-- Step 2: 種子 -->
     <section class="panel" id="stepSeed">
-      <div class="step-title"><span class="step-no">2</span>選擇場次與公開種子</div>
-      <div class="step-hint">
-        依雙月抽獎規則選擇場次。建議使用「事先公告的<b>台灣彩券指定期開獎號碼</b>」作為種子。<br />
-        10 月場與 12 月場開獎過程皆會<b>全程螢幕錄影</b>，並公布中獎名單與使用的彩券號碼。<br />
-        每次抽完後，抽獎券會重新計算。
-      </div>
-      <div class="row">
-        <div>
-          <label>雙月抽獎場次</label>
-          <select id="drawPeriod">
-            <option value="oct">10 月場（8–9 月累積）— 15 位 × 1,000 元統一超商商品卡</option>
-            <option value="dec" id="decPeriodOption">12 月場（10–11 月累積）— 15 位 × 2,000 元統一超商商品卡（雙倍加碼）</option>
-          </select>
-        </div>
-      </div>
+      <div class="step-title"><span class="step-no">2</span>10/15 正式獎項與公開種子</div>
+      <div class="step-hint">10/15 抽獎固定 25 間不同店家：第 1–15 名為 1,000 元超商商品卡，第 16–25 名為德尼祿 × 藍寶堅尼8號聯名精品毛巾。每店一般任務券最多 6 張；8、9 月各月未滿 100 分不得發券；拜訪券目前為 0。使用事先公告的公開種子，正式抽獎請全程錄影。</div>
+      <div class="row"><div><label>正式抽獎場次</label><select id="drawPeriod"><option value="oct">2026/10/15 正式抽獎｜商品卡 15 名＋聯名毛巾 10 名</option></select></div></div>
       <div class="row" style="margin-top:12px">
         <div>
           <label>公開種子（彩券期別 + 號碼）</label>
@@ -330,10 +318,10 @@
         </div>
         <div style="flex:0 0 auto">
           <label>得獎人數</label>
-          <input type="number" id="numWinners" value="15" min="1" style="width:120px" />
+          <input type="number" id="numWinners" value="25" min="25" max="25" readonly style="width:120px" />
         </div>
       </div>
-      <div class="note" style="margin-top:10px">規則：每張抽獎券皆為一個入獎權重，券越多機率越高；同一位參加者最多中獎一次（不放回）。</div>
+      <div class="note" style="margin-top:10px">規則：每張抽獎券皆為一個入獎權重，券越多機率越高；同一店家最多中獎一次，中獎後排除該店全部剩餘抽獎券。</div>
     </section>
 
     <!-- Step 3: 開獎 -->
@@ -345,8 +333,8 @@
       <div class="alert info" id="drawInfo"></div>
 
       <div class="results" id="results">
-        <h3 style="margin:20px 0 10px;color:var(--blue-dark)">🥇 中獎名單（共 <span id="winCount">15</span> 位・獎項相同）</h3>
-        <div class="prize-banner" id="prizeBanner">🎁 獎項：每位中獎者可獲<b>1,000 元統一超商商品卡</b>（10 月場 × 15 位）</div>
+        <h3 style="margin:20px 0 10px;color:var(--blue-dark)">🥇 中獎名單（共 <span id="winCount">25</span> 間・兩種獎項）</h3>
+        <div class="prize-banner" id="prizeBanner">🎁 獎項：<b>1,000 元超商商品卡 ×15</b>／<b>德尼祿 × 藍寶堅尼8號聯名精品毛巾 ×10</b></div>
         <div id="winnerList"></div>
 
         <div class="verify-box">
@@ -380,6 +368,6 @@
 
   <canvas id="confetti" aria-hidden="true"></canvas>
 
-  <script src="lucky.js"></script>
+  <script src="lucky.js?v=1015-2"></script>
 </body>
 </html>
