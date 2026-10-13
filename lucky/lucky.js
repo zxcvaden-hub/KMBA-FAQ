@@ -180,7 +180,7 @@
     els.colName.value = String(nameIdx);
     els.colStore.value = String(storeIdx);
     els.colRegion.value = String(regionIdx);
-    els.colTickets.value = String(ticketIdx);
+    els.colTickets.value = String(detectColumn(headers, [/抽獎券編號/, /券號/], -1) >= 0 ? -1 : ticketIdx);
   }
 
   // Lower-case + strip all whitespace, for smarter duplicate matching.
