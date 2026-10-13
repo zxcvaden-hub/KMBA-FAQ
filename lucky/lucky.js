@@ -4,39 +4,12 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // V0734 bimonthly draw prizes — 統一超商商品卡（all winners receive the same amount).
-  const DEC_DRAW_REVEAL_DATE = new Date('2026-10-01T00:00:00+08:00');
-  const DRAW_PERIODS = {
-    oct: {
-      id: 'oct',
-      prizeBanner: '每位中獎者可獲<b>1,000 元統一超商商品卡</b>（10 月場 × 15 位）',
-      prizeCopy: '每位中獎者可獲 1,000 元統一超商商品卡',
-      defaultSeed: '2026-10-15 威力彩 05-12-18-23-30-37-08',
-    },
-    dec: {
-      id: 'dec',
-      prizeBanner: '每位中獎者可獲<b>2,000 元統一超商商品卡</b>（12 月場雙倍加碼 × 15 位）',
-      prizeCopy: '每位中獎者可獲 2,000 元統一超商商品卡',
-      defaultSeed: '2026-12-15 威力彩 05-12-18-23-30-37-08',
-    },
-  };
-
-  function isDecDrawRevealed() {
-    return new Date() >= DEC_DRAW_REVEAL_DATE;
-  }
-
-  function getSelectedPeriod() {
-    const sel = $('drawPeriod');
-    const id = sel && sel.value === 'dec' && isDecDrawRevealed() ? 'dec' : 'oct';
-    return DRAW_PERIODS[id];
-  }
-
-  function getPrizeCopy(period) {
-    return (period || getSelectedPeriod()).prizeCopy;
-  }
-
+  const PRIZES=Array.from({length:25},(_,i)=>i<15?'1,000 元超商商品卡':'德尼祿 × 藍寶堅尼8號聯名精品毛巾');
+  const DRAW_PERIODS={oct:{id:'oct-1015',prizeBanner:'<b>1,000 元超商商品卡 ×15</b>／<b>德尼祿 × 藍寶堅尼8號聯名精品毛巾 ×10</b>',prizeCopy:'超商商品卡 ×15、聯名精品毛巾 ×10',defaultSeed:'請輸入事先公告的公開種子'}};
+  const getSelectedPeriod=()=>DRAW_PERIODS.oct;
+  const getPrizeCopy=()=>DRAW_PERIODS.oct.prizeCopy;
   // Where the operator's latest official draw is stored (for viewer mode replay).
-  const STORE_KEY = 'kmba_raffle_last';
+  const STORE_KEY = 'kmba_raffle_20261015';
   // Viewer mode: entered via the chatbot back door (?view=1). Watch only, no upload.
   const VIEW_MODE = new URLSearchParams(location.search).get('view') === '1';
 
@@ -88,24 +61,7 @@
     if (els.prizeBanner) els.prizeBanner.innerHTML = `🎁 獎項：${p.prizeBanner}`;
   }
 
-  function initDrawPeriod() {
-    const decOpt = document.getElementById('decPeriodOption');
-    const decBadge = document.getElementById('decBadge');
-    if (!isDecDrawRevealed()) {
-      if (decOpt) decOpt.disabled = true;
-      if (els.drawPeriod) els.drawPeriod.value = 'oct';
-    } else if (decBadge) {
-      decBadge.style.display = '';
-    }
-    if (els.drawPeriod) {
-      els.drawPeriod.addEventListener('change', () => {
-        updatePrizeDisplay();
-        const p = getSelectedPeriod();
-        if (els.seed && !els.seed.value.trim()) els.seed.placeholder = p.defaultSeed;
-      });
-    }
-    updatePrizeDisplay();
-  }
+  function initDrawPeriod(){updatePrizeDisplay();}
 
   initDrawPeriod();
 
@@ -134,16 +90,18 @@
         return;
       }
       const ticketRaw = parts[parts.length - 1];
-      const name = parts.slice(0, -1).join(' ').trim();
+      let name = parts.slice(0, -1).join(' ').trim();
+      if(mergeKey(name)===mergeKey('East village by atrain'))name='東村';
       const tickets = Number(ticketRaw);
       if (!name) {
         errors.push(`第 ${idx + 1} 行缺少姓名：「${text}」`);
         return;
       }
-      if (!Number.isInteger(tickets) || tickets <= 0) {
+      if (!Number.isInteger(tickets) || tickets <= 0 || tickets>6) {
         errors.push(`第 ${idx + 1} 行券數無效：「${ticketRaw}」（需為正整數）`);
         return;
       }
+      if(people.some(p=>mergeKey(p.name)===mergeKey(name))){errors.push('重複店家：'+name);return;}
       people.push({ name, tickets });
     });
     return { people, errors };
@@ -210,14 +168,14 @@
       .join('');
 
     els.colName.innerHTML = optionsHtml;
-    els.colTickets.innerHTML = optionsHtml;
+    els.colTickets.innerHTML = '<option value="-1">每券一張（逐券明細）</option>' + optionsHtml;
     els.colStore.innerHTML = '<option value="-1">（不使用）</option>' + optionsHtml;
     els.colRegion.innerHTML = '<option value="-1">（不使用）</option>' + optionsHtml;
 
-    const nameIdx = detectColumn(headers, [/姓名/, /name/i], 0);
+    const nameIdx = detectColumn(headers, [/統一店名/, /正式店名/, /店名/, /店別/], -1);
     const storeIdx = detectColumn(headers, [/店別/, /店名/, /店/], -1);
     const regionIdx = detectColumn(headers, [/區域/, /地區/, /region/i], -1);
-    const ticketIdx = detectColumn(headers, [/總計/, /抽獎券/, /券/], headers.length - 1);
+    const ticketIdx = detectColumn(headers, [/抽獎券合計/, /該店總券數/, /總券數/, /抽獎券數/, /券數/], -1);
 
     els.colName.value = String(nameIdx);
     els.colStore.value = String(storeIdx);
@@ -230,46 +188,25 @@
     return text.toLowerCase().replace(/\s+/g, '');
   }
 
-  // Build participants from the loaded CSV using the chosen columns + duplicate policy.
-  function buildFromCSV() {
-    const ni = parseInt(els.colName.value, 10);
-    const si = parseInt(els.colStore.value, 10);
-    const ri = parseInt(els.colRegion.value, 10);
-    const ti = parseInt(els.colTickets.value, 10);
-    const mode = els.dupMode.value;
-    const fuzzy = els.fuzzyMerge.checked;
-
-    const order = [];
-    const map = new Map();
-    let skipped = 0;
-
-    state.csv.rows.forEach((row) => {
-      const name = (row[ni] || '').trim();
-      const store = si >= 0 ? (row[si] || '').trim() : '';
-      const region = ri >= 0 ? (row[ri] || '').trim() : '';
-      const tickets = parseInt((row[ti] || '').trim(), 10);
-      if (!name || !Number.isInteger(tickets) || tickets <= 0) {
-        skipped++;
-        return;
-      }
-      const display = store ? `${store}／${name}` : name;
-      const kName = fuzzy ? mergeKey(name) : name;
-      const kStore = fuzzy ? mergeKey(store) : store;
-      let key;
-      if (mode === 'name') key = `n:${kName}`;
-      else if (mode === 'namestore') key = `ns:${kName}\u0001${kStore}`;
-      else key = `row:${order.length}`; // each row is its own entry
-
-      if (map.has(key)) {
-        map.get(key).tickets += tickets;
-      } else {
-        const entry = { name: display, tickets, region };
-        map.set(key, entry);
-        order.push(entry);
-      }
-    });
-
-    return { people: order, skipped };
+  function buildFromCSV(){
+    const ni=Number(els.colName.value),ti=Number(els.colTickets.value);
+    if(ni<0)throw Error('必須選擇正式統一店名欄位');
+    const idCol=detectColumn(state.csv.headers,[/抽獎券編號/,/券號/,/ticket.?id/i],-1);
+    const groups=new Map(),ids=new Set();
+    for(const [i,row] of state.csv.rows.entries()){
+      let name=(row[ni]||'').trim();
+      if(!name)throw Error('第 '+(i+2)+' 行沒有店名');
+      if(mergeKey(name)===mergeKey('East village by atrain'))name='東村';
+      if(/測試人員|^jie$/i.test(name))throw Error('測試資料不得參加：'+name);
+      if(ti<0&&idCol<0)throw Error('逐券明細必須包含抽獎券編號');
+      const n=ti<0?1:Number((row[ti]||'').trim());
+      if(!Number.isInteger(n)||n<1||n>6)throw Error('第 '+(i+2)+' 行券數不合法，應為 1～6');
+      if(idCol>=0){const id=(row[idCol]||'').trim();if(!id||ids.has(id))throw Error('空白或重複券號：'+id);ids.add(id);}
+      const key=mergeKey(name);if(!groups.has(key))groups.set(key,{name,tickets:0});
+      const p=groups.get(key);p.tickets+=n;
+      if(p.tickets>6)throw Error('同店超過 6 張：'+name);
+    }
+    return {people:[...groups.values()],skipped:0};
   }
 
   // ---- Crypto / deterministic randomness -----------------------------------
@@ -315,7 +252,7 @@
   }
 
   function setDrawEnabled() {
-    els.btnDraw.disabled = !(state.people.length > 0 && state.hash);
+    els.btnDraw.disabled = !(state.people.length >= 25 && state.hash);
   }
 
   // ---- Actions -------------------------------------------------------------
@@ -326,7 +263,7 @@
     let people = [];
     let errors = [];
     if (state.csv) {
-      const r = buildFromCSV();
+      let r;try{r=buildFromCSV();}catch(e){showAlert(els.parseErr,e.message,'err');state.people=[];state.hash='';els.parseStat.style.display='none';setDrawEnabled();return;}
       people = r.people;
       if (r.skipped) errors.push(`已略過 ${r.skipped} 筆資料（缺姓名或券數非正整數）。`);
     } else {
@@ -335,9 +272,7 @@
       errors = r.errors;
     }
 
-    if (errors.length) {
-      showAlert(els.parseErr, errors.join('\n'), 'err');
-    }
+    if (errors.length) {showAlert(els.parseErr,errors.join('\n'),'err');state.people=[];state.hash='';els.parseStat.style.display='none';setDrawEnabled();return;}
     if (!people.length) {
       els.parseStat.style.display = 'none';
       state = { people: [], snapshot: '', hash: '', csv: state.csv, lastResult: null };
@@ -414,6 +349,7 @@
       const res = await fetch('result.json', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
+        if(data && data.periodId!=='oct-1015')throw Error('舊版結果不適用');
         if (data && data.winners && data.winners.length) return data;
       }
     } catch (e) { /* no file / offline → fall through */ }
@@ -443,7 +379,7 @@
     if (!state.lastResult) return;
     const r = state.lastResult;
     const payload = {
-      winners: r.winners.map((w) => ({ name: w.name, tickets: w.tickets, region: w.region || '' })),
+      winners: r.winners.map((w) => ({ name: w.name, tickets: w.tickets, region: w.region || '',prize:w.prize })),
       seed: r.seed,
       hash: r.hash,
       drawnAt: r.drawnAt,
@@ -482,7 +418,7 @@
   async function handleDraw() {
     hideAlert(els.drawInfo);
     const seed = els.seed.value.trim();
-    const count = parseInt(els.numWinners.value, 10);
+    const count = 25;
 
     if (!state.people.length || !state.hash) {
       showAlert(els.drawInfo, '請先於步驟 1 解析名單並產生快照。', 'err');
@@ -492,6 +428,7 @@
       showAlert(els.drawInfo, '請於步驟 2 輸入公開種子（建議使用彩券號碼）。', 'err');
       return;
     }
+    if(state.people.length<25){showAlert(els.drawInfo,'合格店家不足25間，無法抽出25間不重複中獎店。','err');return;}
     if (!Number.isInteger(count) || count <= 0) {
       showAlert(els.drawInfo, '得獎人數需為正整數。', 'err');
       return;
@@ -500,7 +437,7 @@
     els.btnDraw.disabled = true;
     els.btnDraw.textContent = '抽選中…';
 
-    const winners = await drawWinners(state.people, seed, count);
+    const winners = (await drawWinners(state.people, seed, count)).map((w,i)=>({...w,prize:PRIZES[i]}));
     const drawnAt = new Date().toLocaleString('zh-TW', { hour12: false });
     const period = getSelectedPeriod();
 
@@ -518,7 +455,7 @@
     // Save the official result so viewer mode (chatbot back door) can replay it.
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({
-        winners: winners.map((w) => ({ name: w.name, tickets: w.tickets, region: w.region || '' })),
+        winners: winners.map((w) => ({ name: w.name, tickets: w.tickets, region: w.region || '',prize:w.prize })),
         seed: seed,
         hash: state.hash,
         drawnAt: drawnAt,
@@ -549,7 +486,7 @@
       row.innerHTML =
         `<div class="rank">${rank}</div>` +
         `<div class="winfo"><div class="nameline"><span class="name"></span>${regionTag}</div>` +
-        `<div class="meta">🥇 中獎・持有 ${w.tickets} 張抽獎券</div></div>`;
+        `<div class="meta">🎁 ${w.prize||PRIZES[i]}・持有 ${w.tickets} 張抽獎券</div></div>`;
       row.querySelector('.name').textContent = w.name;
       if (w.region) row.querySelector('.rtag').textContent = w.region;
       els.winnerList.appendChild(row);
@@ -572,7 +509,7 @@
     const r = state.lastResult;
     const rows = [['序號', '區域', '中獎者', '抽獎券數', '獎項']];
     const prize = r.prize || getPrizeCopy();
-    r.winners.forEach((w, i) => rows.push([i + 1, w.region || '', w.name, w.tickets, prize]));
+    r.winners.forEach((w, i) => rows.push([i + 1, w.region || '', w.name, w.tickets, w.prize||PRIZES[i]]));
     rows.push([]);
     rows.push(['獎項', prize]);
     rows.push(['名單快照(SHA-256)', r.hash]);
@@ -603,7 +540,7 @@
     ];
     r.winners.forEach((w, i) => {
       const reg = w.region ? `［${w.region}］` : '';
-      lines.push(`${i + 1}. ${reg}${w.name}（${w.tickets} 張）`);
+      lines.push(`${i + 1}. ${reg}${w.name}（${w.tickets} 張）｜${w.prize||PRIZES[i]}`);
     });
     lines.push('', '※ 以相同名單與種子於本工具重跑，結果完全相同，歡迎驗證。');
     const text = lines.join('\n');
@@ -634,7 +571,7 @@
       '燈塔Bar,1',
       '南國風情,1',
     ].join('\n');
-    els.seed.value = '2026-10-15 威力彩 05-12-18-23-30-37-08';
+    els.seed.value = '';
     // Switch back to manual mode: clear any loaded CSV.
     state.csv = null;
     els.csvFile.value = '';
