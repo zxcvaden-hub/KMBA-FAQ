@@ -1,0 +1,136 @@
+{
+  "status": "approved",
+  "period": "2026-10-15",
+  "winners": [
+    {
+      "name": "滯漫",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 4
+    },
+    {
+      "name": "憩所·REST around",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 3
+    },
+    {
+      "name": "Hibiki",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 6
+    },
+    {
+      "name": "月餐酒",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 5
+    },
+    {
+      "name": "Commons",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 2
+    },
+    {
+      "name": "角窟咖啡",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 1
+    },
+    {
+      "name": "Below the bar",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 1
+    },
+    {
+      "name": "Error 404",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 4
+    },
+    {
+      "name": "Nobody Knows bar",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 3
+    },
+    {
+      "name": "Drinktopia",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 6
+    },
+    {
+      "name": "Bar sloth",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 5
+    },
+    {
+      "name": "軌跡 Bar Trace",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 4
+    },
+    {
+      "name": "冰茶專賣店",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 4
+    },
+    {
+      "name": "小喬室",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 5
+    },
+    {
+      "name": "BarFrom",
+      "prize": "1,000 元超商商品卡",
+      "tickets": 5
+    },
+    {
+      "name": "月聲",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 3
+    },
+    {
+      "name": "Bar千華",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 4
+    },
+    {
+      "name": "Tunnel Bar",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 1
+    },
+    {
+      "name": "正義冷飲部",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 2
+    },
+    {
+      "name": "NK Restaurant",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 2
+    },
+    {
+      "name": "Lulo",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 3
+    },
+    {
+      "name": "百系品酉（The Shotting Fun）",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 4
+    },
+    {
+      "name": "Bar Firestone",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 3
+    },
+    {
+      "name": "1991",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 2
+    },
+    {
+      "name": "PAUSE",
+      "prize": "德尼祿 × 藍寶堅尼8號聯名精品毛巾",
+      "tickets": 5
+    }
+  ],
+  "seed": "03, 05, 20, 22, 26, 32\t03",
+  "drawnAt": "2026/10/15 10:39:30",
+  "snapshot": "73c1f1cf4cf7475ba26b24927a5fa0a360f841243c7ba83e4993cb951e3bf9aa",
+  "prize": "超商商品卡 ×15、聯名精品毛巾 ×10",
+  "periodId": "oct-1015"
+}
